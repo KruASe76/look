@@ -11,7 +11,7 @@ services:
             POSTGRES_USER: ${POSTGRES_USER}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         ports:
-            - 8001:8000
+            - ${API_EXPOSE_PORT}:8000
         depends_on:
             look-database:
                 condition: service_healthy
