@@ -1,6 +1,5 @@
 __all__ = ["DatabaseSession", "Pagination"]
 
-
 from typing import Annotated
 
 from fastapi import Depends

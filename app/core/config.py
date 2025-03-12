@@ -1,6 +1,5 @@
 __all__ = ["POSTGRES_URL"]
 
-
 import os
 
 postgres_host = os.getenv("POSTGRES_HOST")

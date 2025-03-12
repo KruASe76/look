@@ -1,6 +1,5 @@
 __all__ = ["PydanticResponse"]
 
-
 from collections.abc import Mapping
 
 from fastapi import Response
