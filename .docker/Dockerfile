@@ -1,7 +1,9 @@
-FROM ghcr.io/astral-sh/uv:python3.13-alpine
+FROM ghcr.io/astral-sh/uv:bookworm-slim
 
 WORKDIR /app
-COPY .. .
+COPY app/ ./app/
+COPY certs/ ./certs/
+COPY main.py pyproject.toml uv.lock ./
 
 ENV UV_LINK_MODE=copy
 RUN --mount=type=cache,target=/root/.cache/uv \
