@@ -1,8 +1,8 @@
-__all__ = ["dispose_database", "initialize_database", "spawn_session"]
+__all__ = ["dispose_database", "initialize_database", "spawn_session", "spawn_session_transaction"]
 
 from collections.abc import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSessionTransaction, create_async_engine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -22,4 +22,9 @@ async def dispose_database() -> None:
 
 async def spawn_session() -> AsyncGenerator[AsyncSession]:
     async with AsyncSession(engine) as session:
+        yield session
+
+
+async def spawn_session_transaction() -> AsyncGenerator[AsyncSessionTransaction]:
+    async with AsyncSession(engine).begin() as session:
         yield session
