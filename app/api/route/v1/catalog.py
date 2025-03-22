@@ -1,12 +1,10 @@
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy.orm import selectinload
-from sqlalchemy.sql.functions import random
-from sqlmodel import select
 
-from app.api.route.util.dependencies import DatabaseSession, Pagination
-from app.model.catalog import BriefProductSchema, Product, ProductSchema
+from app.api.route.dependencies import DatabaseSession, JWTUserId, Pagination
+from app.model.catalog import BriefProductSchema, ProductSchema
+from app.service.catalog import CatalogService
 
 catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
 
@@ -14,15 +12,12 @@ catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
 @catalog_router.get(
     "/feed", response_model=list[BriefProductSchema], status_code=status.HTTP_200_OK
 )
-async def feed(pagination: Pagination, session: DatabaseSession) -> ...:
-    statement = (
-        select(Product)
-        .order_by(random())
-        .limit(pagination.limit)
-        .offset(pagination.offset)
+async def feed(
+    pagination: Pagination, user_id: JWTUserId, session: DatabaseSession
+) -> ...:
+    return await CatalogService.get_feed(
+        session, user_id, pagination.limit, pagination.offset
     )
-
-    return (await session.exec(statement)).all()
 
 
 @catalog_router.get(
@@ -31,14 +26,7 @@ async def feed(pagination: Pagination, session: DatabaseSession) -> ...:
     status_code=status.HTTP_200_OK,
 )
 async def get_product(product_id: UUID, session: DatabaseSession) -> ...:
-    # noinspection PyTypeChecker
-    statement = (
-        select(Product)
-        .where(Product.id == product_id)
-        .options(selectinload(Product.reviews))
-    )
-
-    product_optional: Product | None = (await session.exec(statement)).one_or_none()
+    product_optional = await CatalogService.get(session, product_id)
 
     if not product_optional:
         raise HTTPException(

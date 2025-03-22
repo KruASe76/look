@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Query
+from fastapi import Depends, Query
 from pydantic import BaseModel, Field
 
 
@@ -13,3 +13,6 @@ def pagination(
     limit: Annotated[int, Query(gt=0)] = 10, offset: Annotated[int, Query(ge=0)] = 0
 ) -> PaginationSchema:
     return PaginationSchema(limit=limit, offset=offset)
+
+
+Pagination = Annotated[PaginationSchema, Depends(pagination)]

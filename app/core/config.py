@@ -1,14 +1,25 @@
-__all__ = ["POSTGRES_URL"]
-
 import os
+from pathlib import Path
 
-postgres_host = os.getenv("POSTGRES_HOST")
-postgres_port = os.getenv("POSTGRES_PORT")
-postgres_db = os.getenv("POSTGRES_DB")
-postgres_user = os.getenv("POSTGRES_USER")
-postgres_password = os.getenv("POSTGRES_PASSWORD")
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
+from sqlalchemy import URL
 
-POSTGRES_URL = (
-    f"postgresql+asyncpg://"
-    f"{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_db}"
+POSTGRES_URL = URL.create(
+    drivername="postgresql+asyncpg",
+    username=os.getenv("POSTGRES_USER"),
+    password=os.getenv("POSTGRES_PASSWORD"),
+    host=os.getenv("POSTGRES_HOST"),
+    port=os.getenv("POSTGRES_PORT"),
+    database=os.getenv("POSTGRES_DB"),
+)
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+PRIVATE_KEY: RSAPrivateKey = serialization.load_ssh_private_key(
+    data=Path("keys/id_rsa").read_bytes(),
+    password=None,
+)
+PUBLIC_KEY: RSAPublicKey = serialization.load_ssh_public_key(
+    data=Path("keys/id_rsa.pub").read_bytes()
 )

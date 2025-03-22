@@ -1,5 +1,3 @@
-__all__ = ["lifespan"]
-
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
