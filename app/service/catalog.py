@@ -6,7 +6,7 @@ from sqlalchemy.sql.functions import random
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.model.catalog import Product
+from app.model import Product
 
 
 class CatalogService:

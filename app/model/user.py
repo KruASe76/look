@@ -29,7 +29,12 @@ class UserCartSchema(UserCartBase):
 
 # noinspection PyTypeChecker
 class UserBase(SQLModel):
-    id: int = Field(primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
+    telegram_id: int | None = Field(unique=True)
+    username: str | None
+    first_name: str
+    last_name: str | None
+
     parameters: list[str] = Field(default_factory=list, sa_type=ARRAY(String))
     preferences: list[str] = Field(default_factory=list, sa_type=ARRAY(String))
 

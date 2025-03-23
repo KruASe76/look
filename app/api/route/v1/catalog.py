@@ -3,8 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, status
 
 from app.api.route.dependencies import DatabaseSession, JWTUserId, Pagination
-from app.model.catalog import BriefProductSchema, ProductSchema
-from app.service.catalog import CatalogService
+from app.model import BriefProductSchema, ProductSchema
+from app.service import CatalogService
 
 catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
 

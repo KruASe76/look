@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 
+import logfire
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -7,6 +8,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.core.config import POSTGRES_URL
 
 _engine = create_async_engine(POSTGRES_URL)
+logfire.instrument_sqlalchemy(_engine)
 
 
 async def initialize_database() -> None:

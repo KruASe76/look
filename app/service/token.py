@@ -14,7 +14,7 @@ class TokenService:
         """Generate ``access_token`` and ``refresh_token`` with the subject of ``user_id``"""
         now = datetime.now(UTC)
 
-        payload = {"sub": user_id}
+        payload = {"sub": str(user_id)}
 
         access_token = jwt.encode(
             payload=payload | {"exp": now + timedelta(minutes=5)},
@@ -40,6 +40,6 @@ class TokenService:
                 algorithms=(cls._jwt_algorithm,)
             )
 
-            return payload["sub"]
+            return int(payload["sub"])
         except InvalidTokenError as e:
             raise ValueError from e

@@ -8,7 +8,10 @@ from init_data_py.errors.errors import InitDataPyError
 from pydantic import BaseModel
 
 from app.core.config import BOT_TOKEN
-from app.service import TokenService
+from app.model import User
+from app.service import TokenService, UserService
+
+from .database import DatabaseTransaction
 
 
 class AuthConfig:
@@ -80,7 +83,11 @@ def _generate_tokens_and_populate_response(user_id: int, response: Response) -> 
     )
 
 
-async def process_init_data(auth: InitDataAuth, response: Response) -> int:
+async def process_init_data(
+    auth: InitDataAuth,
+    response: Response,
+    session: DatabaseTransaction
+) -> User:
     if auth is None or auth.scheme != AuthConfig.init_data_scheme:
         raise AuthConfig.init_data_unauthorized_exception
 
@@ -95,9 +102,17 @@ async def process_init_data(auth: InitDataAuth, response: Response) -> int:
     ):
         raise AuthConfig.init_data_forbidden_exception
 
-    _generate_tokens_and_populate_response(init_data.user.id, response)
+    user = await UserService.create_user(
+        telegram_id=init_data.user.id,
+        username=init_data.user.username,
+        first_name=init_data.user.first_name,
+        last_name=init_data.user.last_name,
+        session=session,
+    )
 
-    return init_data.user.id
+    _generate_tokens_and_populate_response(user.id, response)
+
+    return user
 
 
 async def process_jwt(token_pair: TokenPairCookie, response: Response) -> int:
@@ -117,5 +132,5 @@ async def process_jwt(token_pair: TokenPairCookie, response: Response) -> int:
         return user_id
 
 
-InitDataUserId = Annotated[int, Depends(process_init_data)]
+InitDataUser = Annotated[User, Depends(process_init_data)]
 JWTUserId = Annotated[int, Depends(process_jwt)]
