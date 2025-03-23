@@ -3,7 +3,7 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.model import User
+from app.model import User, UserCartLink
 
 
 class UserService:
@@ -32,8 +32,12 @@ class UserService:
 
         select_statement = (
             select(User)
-            .where((User.id == user_id) if user_id else (User.telegram_id == telegram_id))
-            .options(selectinload(User.cart))  # FIXME: add collections
+            .where(
+                (User.id == user_id) if user_id else (User.telegram_id == telegram_id)
+            )
+            .options(
+                selectinload(User.cart).selectinload(UserCartLink.product)
+            )  # FIXME: add collections
         )
 
         return (await session.exec(select_statement)).one()

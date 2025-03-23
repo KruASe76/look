@@ -23,7 +23,10 @@ class CatalogService:
 
     @staticmethod
     async def get_feed(
-        session: AsyncSession, user_id: int, limit: int, offset: int  # noqa: ARG004 FIXME
+        session: AsyncSession,
+        user_id: int,  # noqa: ARG004 FIXME
+        limit: int,
+        offset: int,
     ) -> Sequence[Product]:
         statement = select(Product).order_by(random()).limit(limit).offset(offset)
 

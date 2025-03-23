@@ -84,9 +84,7 @@ def _generate_tokens_and_populate_response(user_id: int, response: Response) -> 
 
 
 async def process_init_data(
-    auth: InitDataAuth,
-    response: Response,
-    session: DatabaseTransaction
+    auth: InitDataAuth, response: Response, session: DatabaseTransaction
 ) -> User:
     if auth is None or auth.scheme != AuthConfig.init_data_scheme:
         raise AuthConfig.init_data_unauthorized_exception
@@ -97,7 +95,11 @@ async def process_init_data(
         raise AuthConfig.init_data_forbidden_exception from e
 
     if not (
-        init_data.validate(bot_token=BOT_TOKEN, lifetime=AuthConfig.init_data_lifetime, raise_error=False)
+        init_data.validate(
+            bot_token=BOT_TOKEN,
+            lifetime=AuthConfig.init_data_lifetime,
+            raise_error=False,
+        )
         and init_data.user
     ):
         raise AuthConfig.init_data_forbidden_exception

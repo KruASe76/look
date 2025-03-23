@@ -29,15 +29,12 @@ class TokenService:
 
         return access_token, refresh_token
 
-
     @classmethod
     def decode_token(cls, token: str) -> int:
         """Decode ``token`` and return ``user_id``"""
         try:
             payload = jwt.decode(
-                jwt=token,
-                key=PUBLIC_KEY,
-                algorithms=(cls._jwt_algorithm,)
+                jwt=token, key=PUBLIC_KEY, algorithms=(cls._jwt_algorithm,)
             )
 
             return int(payload["sub"])

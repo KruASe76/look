@@ -38,7 +38,9 @@ class UserBase(SQLModel):
     parameters: list[str] = Field(default_factory=list, sa_type=ARRAY(String))
     preferences: list[str] = Field(default_factory=list, sa_type=ARRAY(String))
 
-    collections: list[str] = Field(default_factory=lambda: ["__FAVOURITE__"], sa_type=ARRAY(String))  # FIXME
+    collections: list[str] = Field(
+        default_factory=lambda: ["__FAVOURITE__"], sa_type=ARRAY(String)
+    )  # FIXME
 
 
 class User(UserBase, table=True):

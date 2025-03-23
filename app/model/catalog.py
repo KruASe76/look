@@ -1,6 +1,5 @@
 from uuid import UUID, uuid4
 
-from pydantic import HttpUrl
 from sqlalchemy import String
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlmodel import Field, Relationship, SQLModel
@@ -33,7 +32,7 @@ class BriefProductBase(SQLModel):
     category: str = Field(index=True)
     sizes: list[str] = Field(default_factory=list, sa_type=ARRAY(String))
     colors: list[str] = Field(default_factory=list, sa_type=ARRAY(String))
-    image_urls: list[HttpUrl] = Field(sa_type=ARRAY(String))
+    image_urls: list[str] = Field(sa_type=ARRAY(String))
 
 
 class ProductBase(BriefProductBase):
