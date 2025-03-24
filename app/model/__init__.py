@@ -6,8 +6,9 @@ __all__ = [
     "ReviewSchema",
     "User",
     "UserCartLink",
+    "UserCreate",
     "UserSchema",
 ]
 
 from .catalog import BriefProductSchema, Product, ProductSchema, Review, ReviewSchema
-from .user import User, UserCartLink, UserSchema
+from .user import User, UserCartLink, UserCreate, UserSchema

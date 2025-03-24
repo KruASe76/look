@@ -22,3 +22,8 @@ PRIVATE_KEY: RSAPrivateKey = serialization.load_ssh_private_key(
 PUBLIC_KEY: RSAPublicKey = serialization.load_ssh_public_key(
     data=Path("keys/id_rsa.pub").read_bytes()
 )
+
+LOGFIRE_SERVICE_NAME = os.getenv("LOGFIRE_SERVICE_NAME")
+LOGFIRE_ENVIRONMENT = os.getenv("LOGFIRE_ENVIRONMENT")
+
+ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS", default="*").split(",")

@@ -11,7 +11,7 @@ class ReviewBase(SQLModel):
     rating: int = Field(ge=1, le=5)
 
 
-class _ReviewId(SQLModel):  # separate model for proper field order
+class _ReviewId(SQLModel):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     product_id: UUID = Field(foreign_key="product.id", ondelete="CASCADE")
 

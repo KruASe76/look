@@ -3,27 +3,16 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.model import User, UserCartLink
+from app.model import User, UserCartLink, UserCreate
 
 
 class UserService:
     # noinspection PyTypeChecker
     @staticmethod
-    async def create_user(
-        telegram_id: int | None,
-        username: str | None,
-        first_name: str,
-        last_name: str | None,
-        session: AsyncSession,
-    ) -> User:
+    async def create_user(user_create: UserCreate, session: AsyncSession) -> User:
         insert_statement = (
             insert(User)
-            .values(
-                telegram_id=telegram_id,
-                username=username,
-                first_name=first_name,
-                last_name=last_name,
-            )
+            .values(**user_create.model_dump())
             .on_conflict_do_nothing()
             .returning(User.id)
         )
@@ -33,7 +22,9 @@ class UserService:
         select_statement = (
             select(User)
             .where(
-                (User.id == user_id) if user_id else (User.telegram_id == telegram_id)
+                (User.id == user_id)
+                if user_id
+                else (User.telegram_id == user_create.telegram_id)
             )
             .options(
                 selectinload(User.cart).selectinload(UserCartLink.product)

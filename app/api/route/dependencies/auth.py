@@ -8,7 +8,7 @@ from init_data_py.errors.errors import InitDataPyError
 from pydantic import BaseModel
 
 from app.core.config import BOT_TOKEN
-from app.model import User
+from app.model import User, UserCreate
 from app.service import TokenService, UserService
 
 from .database import DatabaseTransaction
@@ -60,8 +60,8 @@ InitDataAuth = Annotated[HTTPAuthorizationCredentials | None, Depends(init_data_
 
 
 class TokenPair(BaseModel):
-    access_token: str | None
-    refresh_token: str | None
+    access_token: str | None = None
+    refresh_token: str | None = None
 
 
 TokenPairCookie = Annotated[
@@ -76,10 +76,10 @@ def _generate_tokens_and_populate_response(user_id: int, response: Response) -> 
     access_token, refresh_token = TokenService.generate_token_pair(user_id)
 
     response.set_cookie(
-        "access_token", access_token, httponly=True, secure=True, samesite="strict"
+        "access_token", access_token, httponly=True, secure=True, samesite="none"
     )
     response.set_cookie(
-        "refresh_token", refresh_token, httponly=True, secure=True, samesite="strict"
+        "refresh_token", refresh_token, httponly=True, secure=True, samesite="none"
     )
 
 
@@ -105,10 +105,13 @@ async def process_init_data(
         raise AuthConfig.init_data_forbidden_exception
 
     user = await UserService.create_user(
-        telegram_id=init_data.user.id,
-        username=init_data.user.username,
-        first_name=init_data.user.first_name,
-        last_name=init_data.user.last_name,
+        user_create=UserCreate(
+            telegram_id=init_data.user.id,
+            username=init_data.user.username,
+            first_name=init_data.user.first_name,
+            last_name=init_data.user.last_name,
+            photo_url=init_data.user.photo_url,
+        ),
         session=session,
     )
 
@@ -119,7 +122,7 @@ async def process_init_data(
 
 async def process_jwt(token_pair: TokenPairCookie, response: Response) -> int:
     if not (token_pair.access_token or token_pair.refresh_token):
-        raise AuthConfig.init_data_unauthorized_exception
+        raise AuthConfig.jwt_unauthorized_exception
 
     try:
         return TokenService.decode_token(token_pair.access_token)

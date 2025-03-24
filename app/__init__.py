@@ -1,13 +1,12 @@
 __all__ = ["main"]
 
-import os
 from pathlib import Path
 
 import logfire
 import uvicorn
-from logfire import ScrubbingOptions
 
 from .api import app
+from .core.config import LOGFIRE_ENVIRONMENT, LOGFIRE_SERVICE_NAME
 
 cert_path = Path("certs/cert.pem")
 key_path = Path("certs/key.pem")
@@ -15,9 +14,7 @@ key_path = Path("certs/key.pem")
 
 def main() -> None:
     logfire.configure(
-        service_name=os.getenv("LOGFIRE_SERVICE_NAME"),
-        environment=os.getenv("LOGFIRE_ENVIRONMENT"),
-        scrubbing=ScrubbingOptions(extra_patterns=["token"]),
+        service_name=LOGFIRE_SERVICE_NAME, environment=LOGFIRE_ENVIRONMENT
     )
 
     logfire.instrument_pydantic()
