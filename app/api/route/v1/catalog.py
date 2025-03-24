@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.route.dependencies import DatabaseSession, JWTUserId, Pagination
+from app.api.route.dependencies import DatabaseSession, InitDataUser, Pagination
 from app.model import BriefProductSchema, ProductSchema
 from app.service import CatalogService
 
@@ -13,10 +13,10 @@ catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
     "/feed", response_model=list[BriefProductSchema], status_code=status.HTTP_200_OK
 )
 async def feed(
-    pagination: Pagination, user_id: JWTUserId, session: DatabaseSession
+    pagination: Pagination, user: InitDataUser, session: DatabaseSession
 ) -> ...:
     return await CatalogService.get_feed(
-        session, user_id, pagination.limit, pagination.offset
+        session, user, pagination.limit, pagination.offset
     )
 
 

@@ -10,7 +10,6 @@ dependencies = [
     "logfire[fastapi,sqlalchemy,system-metrics]>=3.9.0",
     "orjson>=3.10.15",
     "pydantic>=2.10.6",
-    "pyjwt[crypto]>=2.10.1",
     "sqlmodel>=0.0.24",
 ]
 

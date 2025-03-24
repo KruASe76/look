@@ -2,10 +2,9 @@ __all__ = [
     "DatabaseSession",
     "DatabaseTransaction",
     "InitDataUser",
-    "JWTUserId",
     "Pagination",
 ]
 
-from .auth import InitDataUser, JWTUserId
+from .auth import InitDataUser
 from .database import DatabaseSession, DatabaseTransaction
 from .pagination import Pagination

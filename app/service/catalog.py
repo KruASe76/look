@@ -6,7 +6,7 @@ from sqlalchemy.sql.functions import random
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.model import Product
+from app.model import Product, User
 
 
 class CatalogService:
@@ -24,7 +24,7 @@ class CatalogService:
     @staticmethod
     async def get_feed(
         session: AsyncSession,
-        user_id: int,  # noqa: ARG004 FIXME
+        user: User,  # noqa: ARG004 FIXME
         limit: int,
         offset: int,
     ) -> Sequence[Product]:

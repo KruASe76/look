@@ -1,5 +1,4 @@
-__all__ = ["CatalogService", "TokenService", "UserService"]
+__all__ = ["CatalogService", "UserService"]
 
 from .catalog import CatalogService
-from .token import TokenService
 from .user import UserService

@@ -17,8 +17,6 @@ services:
       ALLOW_ORIGINS: ${ALLOW_ORIGINS}
     ports:
       - ${API_EXPOSE_PORT}:8000
-    volumes:
-      - ../keys:/app/keys
     depends_on:
       look-database:
         condition: service_healthy
