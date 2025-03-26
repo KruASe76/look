@@ -13,7 +13,7 @@ from app.model import Product, User
 class CatalogService:
     # noinspection PyTypeChecker
     @staticmethod
-    @logfire.instrument
+    @logfire.instrument(record_return=True)
     async def get(session: AsyncSession, product_id: UUID) -> Product | None:
         statement = (
             select(Product)
@@ -24,7 +24,7 @@ class CatalogService:
         return (await session.exec(statement)).one_or_none()
 
     @staticmethod
-    @logfire.instrument
+    @logfire.instrument(record_return=True)
     async def get_feed(
         session: AsyncSession,
         user: User,  # noqa: ARG004 FIXME

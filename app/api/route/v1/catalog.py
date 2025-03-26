@@ -10,17 +10,6 @@ catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
 
 
 @catalog_router.get(
-    "/feed", response_model=list[BriefProductSchema], status_code=status.HTTP_200_OK
-)
-async def feed(
-    pagination: Pagination, user: InitDataUser, session: DatabaseSession
-) -> ...:
-    return await CatalogService.get_feed(
-        session, user, pagination.limit, pagination.offset
-    )
-
-
-@catalog_router.get(
     "/product/{product_id}",
     response_model=ProductSchema,
     status_code=status.HTTP_200_OK,
@@ -34,3 +23,14 @@ async def get_product(product_id: UUID, session: DatabaseSession) -> ...:
         )
 
     return product_optional
+
+
+@catalog_router.get(
+    "/feed", response_model=list[BriefProductSchema], status_code=status.HTTP_200_OK
+)
+async def feed(
+    pagination: Pagination, user: InitDataUser, session: DatabaseSession
+) -> ...:
+    return await CatalogService.get_feed(
+        session, user, pagination.limit, pagination.offset
+    )

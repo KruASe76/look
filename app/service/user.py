@@ -9,7 +9,7 @@ from app.model import User, UserCartLink, UserCreate
 class UserService:
     # noinspection PyTypeChecker
     @staticmethod
-    @logfire.instrument
+    @logfire.instrument(record_return=True)
     async def get_or_create(user_create: UserCreate, session: AsyncSession) -> User:
         if user_create.telegram_id is not None:
             select_statement = (
