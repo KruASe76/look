@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 from uuid import UUID
 
+import logfire
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.functions import random
 from sqlmodel import select
@@ -12,6 +13,7 @@ from app.model import Product, User
 class CatalogService:
     # noinspection PyTypeChecker
     @staticmethod
+    @logfire.instrument
     async def get(session: AsyncSession, product_id: UUID) -> Product | None:
         statement = (
             select(Product)
@@ -22,6 +24,7 @@ class CatalogService:
         return (await session.exec(statement)).one_or_none()
 
     @staticmethod
+    @logfire.instrument
     async def get_feed(
         session: AsyncSession,
         user: User,  # noqa: ARG004 FIXME

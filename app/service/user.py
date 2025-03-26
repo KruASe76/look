@@ -1,3 +1,4 @@
+import logfire
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -8,6 +9,7 @@ from app.model import User, UserCartLink, UserCreate
 class UserService:
     # noinspection PyTypeChecker
     @staticmethod
+    @logfire.instrument
     async def get_or_create(user_create: UserCreate, session: AsyncSession) -> User:
         if user_create.telegram_id is not None:
             select_statement = (
