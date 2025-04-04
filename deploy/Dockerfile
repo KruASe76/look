@@ -10,3 +10,4 @@ RUN --mount=type=cache,target=$UV_CACHE_DIR \
     uv sync --frozen --no-dev --compile-bytecode
 
 CMD ["uv", "run", "--no-dev", "python3", "main.py"]
+EXPOSE 8000

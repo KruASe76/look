@@ -1,0 +1,63 @@
+services:
+  traefik:
+    image: traefik:v3.3
+    container_name: traefik
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entryPoints.websecure.address=:443
+      - --entryPoints.websecure.http.tls=true
+      - --providers.file.filename=/traefik/dynamic.yml
+      - --providers.file.watch=true
+    ports:
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/certs:ro
+      - ./traefik.yml:/traefik/dynamic.yml:ro
+    networks:
+      - look-network
+    restart: always
+
+  look-backend:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
+    env_file:
+      - .env
+    scale: 2
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.look-backend.rule=Host(`${API_HOST}`)
+      - traefik.http.routers.look-backend.entryPoints=websecure
+    depends_on:
+      look-database:
+        condition: service_healthy
+    networks:
+      - look-network
+    restart: always
+
+  look-database:
+    image: postgres:16-alpine
+    container_name: ${POSTGRES_HOST}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - look-database:/var/lib/postgresql/data
+    networks:
+      - look-network
+    restart: always
+
+volumes:
+  look-database:
+
+networks:
+  look-network:
