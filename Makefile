@@ -6,6 +6,14 @@ CERT_AND_KEY_EXISTENCE_CHECK = $(and $(wildcard $(CERT_PATH)),$(wildcard $(CERT_
 CERT_OR_KEY_EXISTENCE_CHECK = $(or $(wildcard $(CERT_PATH)),$(wildcard $(CERT_KEY_PATH)))
 
 
+all: prod
+
+
+prod: setup-env prod-certs run
+
+dev: setup-env dev-certs run
+
+
 $(DEPLOY_DIR)/.env:
 	cp $(DEPLOY_DIR)/.env.example $(DEPLOY_DIR)/.env
 	nano $(DEPLOY_DIR)/.env
