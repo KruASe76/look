@@ -40,12 +40,12 @@ endif
 
 
 run:
-	docker compose up -d
+	cd $(DEPLOY_DIR) && docker compose up -d
 
 stop:
-	docker compose down
+	cd $(DEPLOY_DIR) && docker compose down
 
 clean:
-	docker compose down -v
+	cd $(DEPLOY_DIR) && docker compose down -v
 
 restart: stop run
