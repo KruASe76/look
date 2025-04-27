@@ -7,9 +7,18 @@
 
 ## Launch
 
-```shell
-cd .docker/
-cp .env.example .env
-# modify .env
-docker compose up -d
-```
+### Docker Compose (via `make`)
+
+1. Clone the repository:
+    ```shell
+    git clone https://github.com/KruASe76/look.git
+    cd look
+    ```
+
+2. Run:
+    ```shell
+    make       # production
+    ```
+    ```shell
+    make dev   # development
+    ```

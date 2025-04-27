@@ -43,9 +43,9 @@ run:
 	cd $(DEPLOY_DIR) && docker compose up -d
 
 stop:
-	cd $(DEPLOY_DIR) && docker compose down
+	cd $(DEPLOY_DIR) && docker compose down --rmi local
 
 clean:
-	cd $(DEPLOY_DIR) && docker compose down -v
+	cd $(DEPLOY_DIR) && docker compose down --rmi local -v
 
 restart: stop run
