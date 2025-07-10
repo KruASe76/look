@@ -43,10 +43,6 @@ class UserBase(SQLModel):
     )  # FIXME
 
 
-class UserCreate(UserBase):
-    pass
-
-
 class _UserIdModel(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
 
@@ -55,6 +51,10 @@ class User(UserBase, _UserIdModel, table=True):
     __tablename__ = "user"
 
     cart: list[UserCartLink] = Relationship(back_populates="user", cascade_delete=True)
+
+
+class UserCreate(UserBase):
+    pass
 
 
 class _UserIdSchema(SQLModel):

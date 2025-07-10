@@ -1,16 +1,18 @@
 [project]
 name = "look"
 version = "0.1.0"
-description = "Add your description here"
+description = "Backend for a clothing marketplace"
 requires-python = ">=3.13"
 dependencies = [
     "asyncpg>=0.30.0",
-    "fastapi[standard]>=0.115.12",
+    "fastapi[standard]>=0.116.0",
+    "frozendict>=2.4.6",
     "init-data-py>=0.2.6",
-    "logfire[fastapi,sqlalchemy,system-metrics]>=3.11.0",
-    "orjson>=3.10.16",
-    "pydantic>=2.10.6",
+    "logfire[fastapi,sqlalchemy,system-metrics]>=3.23.0",
+    "orjson>=3.10.18",
+    "pydantic>=2.11.7",
     "sqlmodel>=0.0.24",
+    "typer>=0.16.0",
 ]
 
 

@@ -11,7 +11,7 @@ all: prod
 
 prod: setup-env prod-certs run
 
-dev: setup-env dev-certs run
+dev: setup-env dev-certs run-dev
 
 
 $(DEPLOY_DIR)/.env:
@@ -42,6 +42,9 @@ endif
 run:
 	cd $(DEPLOY_DIR) && docker compose up -d
 
+run-dev:
+	cd $(DEPLOY_DIR) && docker compose -f compose.yml -f compose.dev.yml up -d
+
 stop:
 	cd $(DEPLOY_DIR) && docker compose down --rmi local
 
@@ -49,3 +52,4 @@ clean:
 	cd $(DEPLOY_DIR) && docker compose down --rmi local -v
 
 restart: stop run
+redev: stop run-dev

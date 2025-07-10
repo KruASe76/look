@@ -10,11 +10,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.model import Product, User
 
 
+# noinspection PyTypeChecker,Pydantic
 class CatalogService:
-    # noinspection PyTypeChecker
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def get(session: AsyncSession, product_id: UUID) -> Product | None:
+    async def get_by_id(session: AsyncSession, product_id: UUID) -> Product | None:
         statement = (
             select(Product)
             .where(Product.id == product_id)
@@ -27,7 +27,7 @@ class CatalogService:
     @logfire.instrument(record_return=True)
     async def get_feed(
         session: AsyncSession,
-        user: User,  # noqa: ARG004 FIXME
+        user: User,  # noqa: ARG004 TODO
         limit: int,
         offset: int,
     ) -> Sequence[Product]:

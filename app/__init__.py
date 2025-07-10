@@ -1,29 +1,32 @@
 __all__ = ["main"]
 
-from pathlib import Path
+from typing import Annotated
 
 import logfire
+import typer
 import uvicorn
 
 from .api import app
 from .core.config import LOGFIRE_ENVIRONMENT, LOGFIRE_SERVICE_NAME
 
-cert_path = Path("certs/cert.pem")
-key_path = Path("certs/key.pem")
 
-
-def main() -> None:
+def main(
+    host: Annotated[str, typer.Option(envvar="APP_HOST")] = "localhost",
+    port: Annotated[int, typer.Option(envvar="APP_PORT")] = 8000,
+    *,
+    reload: Annotated[bool, typer.Option(help="Enable hot-reload")] = False,
+) -> None:
     logfire.configure(
-        service_name=LOGFIRE_SERVICE_NAME, environment=LOGFIRE_ENVIRONMENT
+        service_name=LOGFIRE_SERVICE_NAME,
+        environment=LOGFIRE_ENVIRONMENT,
+        send_to_logfire="if-token-present",
     )
 
     logfire.instrument_pydantic()
     logfire.instrument_fastapi(app)
 
-    uvicorn.run(
-        app,
-        host="0.0.0.0",  # noqa: S104
-        port=8000,
-        ssl_certfile=cert_path if cert_path.exists() else None,
-        ssl_keyfile=key_path if key_path.exists() else None,
-    )
+    uvicorn.run(f"{__name__}:app", host=host, port=port, reload=reload)
+
+
+def cli() -> None:
+    typer.run(main)

@@ -58,14 +58,14 @@ async def process_init_data(auth: InitDataAuth, session: DatabaseTransaction) ->
         raise AuthConfig.init_data_forbidden_exception
 
     return await UserService.get_or_create(
-        user_create=UserCreate(
+        session,
+        UserCreate(
             telegram_id=init_data.user.id,
             username=init_data.user.username,
             first_name=init_data.user.first_name,
             last_name=init_data.user.last_name,
             photo_url=init_data.user.photo_url,
         ),
-        session=session,
     )
 
 

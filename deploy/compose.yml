@@ -1,3 +1,5 @@
+name: look
+
 services:
   traefik:
     image: traefik:v3.3
@@ -15,11 +17,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./certs:/certs:ro
       - ./traefik.yml:/traefik/dynamic.yml:ro
-    networks:
-      - look-network
     restart: always
 
-  look-backend:
+  backend:
     build:
       context: ../
       dockerfile: deploy/Dockerfile
@@ -28,16 +28,14 @@ services:
     scale: 2
     labels:
       - traefik.enable=true
-      - traefik.http.routers.look-backend.rule=Host(`${API_HOST}`)
-      - traefik.http.routers.look-backend.entryPoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend.rule=Host(`${API_HOST}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend.entryPoints=websecure
     depends_on:
-      look-database:
+      postgres:
         condition: service_healthy
-    networks:
-      - look-network
     restart: always
 
-  look-database:
+  postgres:
     image: postgres:16-alpine
     container_name: ${POSTGRES_HOST}
     environment:
@@ -51,13 +49,8 @@ services:
       retries: 5
       start_period: 5s
     volumes:
-      - look-database:/var/lib/postgresql/data
-    networks:
-      - look-network
+      - postgres:/var/lib/postgresql/data
     restart: always
 
 volumes:
-  look-database:
-
-networks:
-  look-network:
+  postgres:

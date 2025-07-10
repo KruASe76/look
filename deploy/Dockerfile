@@ -9,5 +9,7 @@ ENV UV_CACHE_DIR=/cache/uv
 RUN --mount=type=cache,target=$UV_CACHE_DIR \
     uv sync --frozen --no-dev --compile-bytecode
 
-CMD ["uv", "run", "--no-dev", "python3", "main.py"]
-EXPOSE 8000
+ENV APP_HOST=0.0.0.0
+ENV APP_PORT=8000
+CMD ["uv", "run", "--no-dev", "main.py"]
+EXPOSE $APP_PORT
