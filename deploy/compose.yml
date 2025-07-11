@@ -3,7 +3,6 @@ name: look
 services:
   traefik:
     image: traefik:v3.3
-    container_name: traefik
     command:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
@@ -33,6 +32,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     restart: always
 
   postgres:
@@ -42,15 +43,36 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 5s
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.3
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "true"
+      xpack.security.transport.ssl.enabled: "false"
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
     volumes:
-      - postgres:/var/lib/postgresql/data
-    restart: always
+      - elasticsearch:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "curl -fsSL -u ${ELASTIC_USERNAME}:${ELASTIC_PASSWORD} ${ELASTIC_HOST}/_cluster/health?wait_for_status=yellow&timeout=5s || exit 1"
+      ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
 volumes:
   postgres:
+  elasticsearch:

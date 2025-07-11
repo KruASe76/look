@@ -7,10 +7,15 @@ from init_data_py import InitData
 from init_data_py.errors.errors import InitDataPyError
 
 from app.core.config import BOT_TOKEN
-from app.model import User, UserCreate
+from app.model import (
+    AuthenticatedUser,
+    User,
+    UserCreate,
+    AuthenticatedUserWithCollectionIds,
+)
 from app.service import UserService
 
-from .database import DatabaseTransaction
+from .database import DatabaseSession, DatabaseTransaction
 
 
 class AuthConfig:
@@ -43,7 +48,7 @@ init_data_auth = HTTPBase(
 InitDataAuth = Annotated[HTTPAuthorizationCredentials | None, Depends(init_data_auth)]
 
 
-async def process_init_data(auth: InitDataAuth, session: DatabaseTransaction) -> User:
+async def validate_init_data(auth: InitDataAuth) -> InitData:
     if auth is None or auth.scheme != AuthConfig.init_data_scheme:
         raise AuthConfig.init_data_unauthorized_exception
 
@@ -57,6 +62,13 @@ async def process_init_data(auth: InitDataAuth, session: DatabaseTransaction) ->
     ):
         raise AuthConfig.init_data_forbidden_exception
 
+    return init_data
+
+
+ValidInitData = Annotated[InitData, Depends(validate_init_data)]
+
+
+async def get_full_user(init_data: ValidInitData, session: DatabaseTransaction) -> User:
     return await UserService.get_or_create(
         session,
         UserCreate(
@@ -69,4 +81,33 @@ async def process_init_data(auth: InitDataAuth, session: DatabaseTransaction) ->
     )
 
 
-InitDataUser = Annotated[User, Depends(process_init_data)]
+async def get_authenticated_user(
+    init_data: ValidInitData, session: DatabaseSession
+) -> AuthenticatedUser:
+    user = await UserService.get_authenticated(session, init_data.user.id)
+
+    if user is None:
+        raise AuthConfig.init_data_unauthorized_exception
+
+    return user
+
+
+async def get_authenticated_user_with_collection_ids(
+    init_data: ValidInitData, session: DatabaseSession
+) -> AuthenticatedUserWithCollectionIds:
+    user = await UserService.get_authenticated_with_collection_ids(
+        session, init_data.user.id
+    )
+
+    if user is None:
+        raise AuthConfig.init_data_unauthorized_exception
+
+    return user
+
+
+InitDataUserFull = Annotated[User, Depends(get_full_user)]
+InitDataUser = Annotated[AuthenticatedUser, Depends(get_authenticated_user)]
+InitDataUserWithCollectionIds = Annotated[
+    AuthenticatedUserWithCollectionIds,
+    Depends(get_authenticated_user_with_collection_ids),
+]

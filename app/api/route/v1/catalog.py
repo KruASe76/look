@@ -17,6 +17,7 @@ catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
     response_model=ProductSchema,
     status_code=status.HTTP_200_OK,
     responses=build_responses({status.HTTP_404_NOT_FOUND: messages.PRODUCT_NOT_FOUND}),
+    description="Get product by id",
 )
 async def get_product(product_id: UUID, session: DatabaseSession) -> ...:
     product_optional = await CatalogService.get_by_id(session, product_id)
@@ -34,6 +35,7 @@ async def get_product(product_id: UUID, session: DatabaseSession) -> ...:
     response_model=list[BriefProductSchema],
     status_code=status.HTTP_200_OK,
     responses=build_responses(include_auth=True),
+    description="Get feed of products",
 )
 async def feed(
     pagination: Pagination, user: InitDataUser, session: DatabaseSession

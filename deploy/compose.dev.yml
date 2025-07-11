@@ -20,3 +20,7 @@ services:
   postgres:
     ports:
       - ${POSTGRES_DEV_PORT}:5432
+
+  elasticsearch:
+    ports:
+      - ${ELASTIC_DEV_PORT}:9200

@@ -2,6 +2,8 @@ import os
 
 from sqlalchemy import URL
 
+# TECHNICAL
+
 POSTGRES_URL = URL.create(
     drivername="postgresql+asyncpg",
     username=os.getenv("POSTGRES_USER"),
@@ -17,3 +19,8 @@ LOGFIRE_SERVICE_NAME = os.getenv("LOGFIRE_SERVICE_NAME")
 LOGFIRE_ENVIRONMENT = os.getenv("LOGFIRE_ENVIRONMENT")
 
 ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS", default="*").split(",")
+
+
+# BUSINESS
+
+DEFAULT_COLLECTION_NAME = "__FAVOURITES__"

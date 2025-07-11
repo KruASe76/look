@@ -46,10 +46,10 @@ run-dev:
 	cd $(DEPLOY_DIR) && docker compose -f compose.yml -f compose.dev.yml up -d
 
 stop:
-	cd $(DEPLOY_DIR) && docker compose down --rmi local
+	cd $(DEPLOY_DIR) && docker compose -f compose.yml -f compose.dev.yml down --rmi local
 
 clean:
-	cd $(DEPLOY_DIR) && docker compose down --rmi local -v
+	cd $(DEPLOY_DIR) && docker compose -f compose.yml -f compose.dev.yml down --rmi local -v
 
 restart: stop run
 redev: stop run-dev

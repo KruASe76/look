@@ -15,6 +15,7 @@ user_router = APIRouter(prefix="/user", tags=["user"])
     response_model=UserSchema,
     status_code=status.HTTP_200_OK,
     responses=build_responses({status.HTTP_404_NOT_FOUND: messages.USER_NOT_FOUND}),
+    description="Get user by id",
 )
 async def get_user(user_id: int, session: DatabaseSession) -> ...:
     user_optional = await UserService.get_by_id(session, user_id)
