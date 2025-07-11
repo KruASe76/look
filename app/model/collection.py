@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING
-from uuid import UUID, uuid4
+from uuid import UUID
 
+from sqlalchemy import Column, String, text
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -14,13 +16,20 @@ class CollectionProductLink(SQLModel, table=True):
     product_id: UUID = Field(foreign_key="product.id", primary_key=True)
 
 
+# noinspection PyTypeChecker
 class CollectionBase(SQLModel):
-    name: str
+    name: str = Field(max_length=255, sa_type=String(255), nullable=False)
     cover_image_url: str | None = None
 
 
 class _CollectionIdsModel(SQLModel):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    id: UUID = Field(
+        sa_column=Column(
+            PG_UUID(as_uuid=True),
+            primary_key=True,
+            server_default=text("gen_random_uuid()"),
+        )
+    )
     owner_id: int = Field(foreign_key="user.id", index=True)
 
 

@@ -1,24 +1,54 @@
-from uuid import UUID, uuid4
+from datetime import datetime
+from uuid import UUID
 
-from sqlalchemy import String
+from sqlalchemy import Column, DateTime, String, func, text
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import Field, SQLModel
 
 
 # noinspection PyTypeChecker
 class BriefProductBase(SQLModel):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    name: str
-    brand: str = Field(index=True)
-    category: str = Field(index=True)
-    sizes: list[str] = Field(default_factory=list, sa_type=ARRAY(String))
-    color: str = Field(index=True)
-    image_urls: list[str] = Field(sa_type=ARRAY(String))
-    # to be modified...
+    id: UUID = Field(
+        sa_column=Column(
+            PG_UUID(as_uuid=True),
+            primary_key=True,
+            server_default=text("gen_random_uuid()"),
+        )
+    )
+    article: str = Field(unique=True, max_length=50, sa_type=String(50), nullable=False)
+
+    name: str = Field(max_length=255, sa_type=String(255), nullable=False)
+    brand: str = Field(max_length=255, sa_type=String(255), nullable=False)
+
+    category: str = Field(max_length=50, sa_type=String(50), nullable=False)
+    color_code: str = Field(
+        min_length=7, max_length=7, sa_type=String(7), nullable=False
+    )
+    color_name: str = Field(max_length=50, sa_type=String(50), nullable=False)
+    sizes: list[str] = Field(
+        sa_column=Column(ARRAY(String), server_default="{}", nullable=False),
+        default_factory=list,
+    )
+
+    image_urls: list[str] = Field(
+        sa_column=Column(ARRAY(String), server_default="{}", nullable=False),
+        default_factory=list,
+    )
+
+    price: float = Field(ge=0, nullable=False)
+    discount_price: float = Field(ge=0, nullable=False)
+
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True), server_default=func.now(), nullable=False
+        )
+    )
 
 
+# noinspection PyTypeChecker
 class ProductBase(BriefProductBase):
-    description: str
+    description: str = Field(max_length=4096, sa_type=String(4096), nullable=False)
 
 
 class Product(ProductBase, table=True):

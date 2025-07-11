@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -8,16 +9,20 @@ if TYPE_CHECKING:
     from . import BriefCollectionSchema, BriefProductSchema, Collection, Product
 
 
+# noinspection PyTypeChecker
 class BriefUserBase(SQLModel):
     telegram_id: int | None = Field(unique=True)
-    username: str | None
-    first_name: str
-    last_name: str | None
+    username: str | None = Field(max_length=64, sa_type=String(64))
+    first_name: str = Field(max_length=64, sa_type=String(64), nullable=False)
+    last_name: str | None = Field(max_length=64, sa_type=String(64))
     photo_url: str | None
 
 
 class UserBase(BriefUserBase):
-    preferences: dict[str, Any] = Field(default_factory=dict, sa_type=JSONB)
+    preferences: dict[str, Any] = Field(
+        sa_column=Column(JSONB, server_default="{}", nullable=False),
+        default_factory=dict,
+    )
 
 
 class _UserIdModel(SQLModel):
@@ -68,7 +73,7 @@ class AuthenticatedUserWithCollectionIds(AuthenticatedUser):
 
 
 class UserCartBase(SQLModel):
-    quantity: int = 1
+    quantity: int = Field(ge=1, default=1, nullable=False)
 
 
 class _UserCartIds(SQLModel):
