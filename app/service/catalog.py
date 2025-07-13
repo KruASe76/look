@@ -2,7 +2,6 @@ from collections.abc import Sequence
 from uuid import UUID
 
 import logfire
-from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.functions import random
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -15,11 +14,7 @@ class CatalogService:
     @staticmethod
     @logfire.instrument(record_return=True)
     async def get_by_id(session: AsyncSession, product_id: UUID) -> Product | None:
-        statement = (
-            select(Product)
-            .where(Product.id == product_id)
-            .options(selectinload(Product.reviews))
-        )
+        statement = select(Product).where(Product.id == product_id)
 
         return (await session.exec(statement)).one_or_none()
 

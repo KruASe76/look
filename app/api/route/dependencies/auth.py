@@ -9,9 +9,9 @@ from init_data_py.errors.errors import InitDataPyError
 from app.core.config import BOT_TOKEN
 from app.model import (
     AuthenticatedUser,
+    AuthenticatedUserWithCollectionIds,
     User,
     UserCreate,
-    AuthenticatedUserWithCollectionIds,
 )
 from app.service import UserService
 

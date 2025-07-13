@@ -1,10 +1,12 @@
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
 from app.api.route.dependencies import DatabaseSession, InitDataUser, Pagination
+from app.api.schema import SearchQuery
 from app.model import BriefProductSchema, ProductSchema
-from app.service import CatalogService
+from app.service import CatalogService, SearchService
 
 from .. import messages
 from ..util import build_responses
@@ -42,4 +44,27 @@ async def feed(
 ) -> ...:
     return await CatalogService.get_feed(
         session, user, pagination.limit, pagination.offset
+    )
+
+
+@catalog_router.post(
+    "/search",
+    response_model=list[Any],
+    status_code=status.HTTP_200_OK,
+    responses=build_responses(include_auth=True),
+    description="Search products",
+)
+async def search_catalog(
+    user: InitDataUser, query: SearchQuery, pagination: Pagination
+) -> ...:
+    return await SearchService.search_products(
+        user=user,
+        query=query.query,
+        categories=query.categories,
+        colors=query.colors,
+        brands=query.brands,
+        min_price=query.min_price,
+        max_price=query.max_price,
+        limit=pagination.limit,
+        offset=pagination.offset,
     )

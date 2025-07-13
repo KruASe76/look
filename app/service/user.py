@@ -87,9 +87,7 @@ class UserService:
         statement = (
             select(User)
             .where(User.telegram_id == telegram_id)
-            .options(
-                load_only(User.id), selectinload(User.collections)
-            )
+            .options(load_only(User.id), selectinload(User.collections))
         )
 
         user = (await session.exec(statement)).one_or_none()

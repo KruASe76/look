@@ -19,7 +19,9 @@ from app.model import (
 class CollectionService:
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def get_by_id(session: AsyncSession, collection_id: UUID) -> Collection | None:
+    async def get_by_id(
+        session: AsyncSession, collection_id: UUID
+    ) -> Collection | None:
         statement = (
             select(Collection)
             .where(Collection.id == collection_id)
@@ -78,7 +80,10 @@ class CollectionService:
 
         statement = insert(CollectionProductLink).values(links_to_insert)
         statement = statement.on_conflict_do_nothing(
-            index_elements=[CollectionProductLink.collection_id, CollectionProductLink.product_id]
+            index_elements=[
+                CollectionProductLink.collection_id,
+                CollectionProductLink.product_id,
+            ]
         )
         await session.exec(statement)
 
@@ -103,7 +108,9 @@ class CollectionService:
     @staticmethod
     @logfire.instrument(record_return=True)
     async def check_product_inclusion(
-        session: AsyncSession, product_id: UUID, user: AuthenticatedUserWithCollectionIds
+        session: AsyncSession,
+        product_id: UUID,
+        user: AuthenticatedUserWithCollectionIds,
     ) -> list[UUID]:
         if not user.collection_ids:
             return []
@@ -130,7 +137,9 @@ class CollectionService:
         )
 
         collections_to_add = list(set(new_collection_ids) - set(current_collection_ids))
-        collections_to_remove = list(set(current_collection_ids) - set(new_collection_ids))
+        collections_to_remove = list(
+            set(current_collection_ids) - set(new_collection_ids)
+        )
 
         if collections_to_add:
             await CollectionService.add_products(
