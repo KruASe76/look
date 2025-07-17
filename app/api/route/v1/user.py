@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.route.dependencies import DatabaseSession
 from app.model import UserSchema
 from app.service import UserService
 
 from .. import messages
+from ..dependencies import DatabaseSession
 from ..util import build_responses
 
 user_router = APIRouter(prefix="/user", tags=["user"])

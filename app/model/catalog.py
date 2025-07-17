@@ -39,9 +39,12 @@ class BriefProductBase(SQLModel):
     price: float = Field(ge=0, nullable=False)
     discount_price: float = Field(ge=0, nullable=False)
 
-    created_at: datetime = Field(
+    updated_at: datetime = Field(
         sa_column=Column(
-            DateTime(timezone=True), server_default=func.now(), nullable=False
+            DateTime(timezone=True),
+            server_default=func.now(),
+            server_onupdate=func.now(),
+            nullable=False,
         )
     )
 

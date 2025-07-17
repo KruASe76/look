@@ -32,15 +32,20 @@ def build_responses(
     /,
     *,
     include_auth: bool = False,
+    include_dev_auth: bool = False,
 ) -> dict[int, dict[str, ...]]:
-    defaults = (
-        {
+    defaults = {}
+
+    if include_auth:
+        defaults |= {
             status.HTTP_401_UNAUTHORIZED: AuthConfig.init_data_unauthorized_exception.detail,
             status.HTTP_403_FORBIDDEN: AuthConfig.init_data_forbidden_exception.detail,
         }
-        if include_auth
-        else {}
-    )
+
+    if include_dev_auth:
+        defaults |= {
+            status.HTTP_403_FORBIDDEN: AuthConfig.api_key_forbidden_exception.detail,
+        }
 
     return _build_responses_internal(
         frozendict(defaults | (status_code_to_message or {}))

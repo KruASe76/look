@@ -1,6 +1,8 @@
-from typing import ClassVar
+from typing import ClassVar, Self
 
 from elasticsearch.dsl import AsyncDocument, Float, Keyword, Text, analysis
+
+from app.model import Product as ProductModel
 
 from .config import PRODUCT_INDEX_NAME
 
@@ -28,3 +30,17 @@ class Product(AsyncDocument):
         name = PRODUCT_INDEX_NAME
         settings: ClassVar = {"number_of_shards": 1, "number_of_replicas": 0}
         analyzers: ClassVar = [russian_analyzer]
+
+    # noinspection PyArgumentList
+    @classmethod
+    def from_product(cls, product: ProductModel) -> Self:
+        return cls(
+            meta={"id": product.id},
+            article=product.article,
+            name=product.name,
+            brand=product.brand,
+            category=product.category,
+            color_name=product.color_name,
+            description=product.description,
+            price=product.discount_price,
+        )

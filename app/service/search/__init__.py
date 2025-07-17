@@ -1,16 +1,36 @@
-from typing import Any
+from datetime import datetime
+from uuid import UUID
 
 import logfire
 from elasticsearch.dsl import AsyncSearch
 from elasticsearch.dsl.query import Match, MultiMatch, Range, Terms
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.model import AuthenticatedUser
+from app.model import AuthenticatedUser, Product
 
 from .config import PRODUCT_INDEX_NAME
+from .indices import Product as ProductDocument
 from .util import is_article
 
 
 class SearchService:
+    # noinspection PyTypeChecker,Pydantic
+    @staticmethod
+    @logfire.instrument()
+    async def sync_products(session: AsyncSession, since: datetime) -> int:
+        """
+        :return: number of products synced
+        """
+
+        statement = select(Product).where(Product.updated_at > since)
+        products = (await session.exec(statement)).all()
+
+        for product in products:
+            await ProductDocument.from_product(product).save()
+
+        return len(products)
+
     @staticmethod
     @logfire.instrument(record_return=True)
     async def search_products(
@@ -23,8 +43,8 @@ class SearchService:
         max_price: float | None,
         limit: int,
         offset: int,
-    ) -> list[Any]:
-        search = AsyncSearch(index=PRODUCT_INDEX_NAME)
+    ) -> list[UUID]:
+        search = AsyncSearch(index=PRODUCT_INDEX_NAME).source(fields=False)
 
         if query:
             if is_article(query):
@@ -73,4 +93,4 @@ class SearchService:
 
         response = await search.execute()
 
-        return response.hits
+        return [UUID(hit.meta.id) for hit in response.hits]

@@ -1,14 +1,13 @@
-from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.route.dependencies import DatabaseSession, InitDataUser, Pagination
 from app.api.schema import SearchQuery
 from app.model import BriefProductSchema, ProductSchema
 from app.service import CatalogService, SearchService
 
 from .. import messages
+from ..dependencies import DatabaseSession, InitDataUser, Pagination
 from ..util import build_responses
 
 catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
@@ -49,15 +48,18 @@ async def feed(
 
 @catalog_router.post(
     "/search",
-    response_model=list[Any],
+    response_model=list[BriefProductSchema],
     status_code=status.HTTP_200_OK,
     responses=build_responses(include_auth=True),
     description="Search products",
 )
 async def search_catalog(
-    user: InitDataUser, query: SearchQuery, pagination: Pagination
+    user: InitDataUser,
+    query: SearchQuery,
+    pagination: Pagination,
+    session: DatabaseSession,
 ) -> ...:
-    return await SearchService.search_products(
+    product_ids = await SearchService.search_products(
         user=user,
         query=query.query,
         categories=query.categories,
@@ -68,3 +70,5 @@ async def search_catalog(
         limit=pagination.limit,
         offset=pagination.offset,
     )
+
+    return await CatalogService.get_by_ids(session, product_ids)

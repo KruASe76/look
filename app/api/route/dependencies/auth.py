@@ -1,12 +1,12 @@
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials
 from fastapi.security.http import HTTPBase
 from init_data_py import InitData
 from init_data_py.errors.errors import InitDataPyError
 
-from app.core.config import BOT_TOKEN
+from app.core.config import BOT_TOKEN, DEV_API_KEY
 from app.model import (
     AuthenticatedUser,
     AuthenticatedUserWithCollectionIds,
@@ -36,6 +36,12 @@ class AuthConfig:
     init_data_forbidden_exception = HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
         detail=f"{init_data_scheme.upper()} init-data invalid or expired",
+    )
+
+    api_key_scheme = APIKeyHeader(name="x-api-key")
+
+    api_key_forbidden_exception = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN, detail="API key is missing or invalid"
     )
 
 
@@ -111,3 +117,11 @@ InitDataUserWithCollectionIds = Annotated[
     AuthenticatedUserWithCollectionIds,
     Depends(get_authenticated_user_with_collection_ids),
 ]
+
+
+async def validate_api_key(api_key: str = Depends(AuthConfig.api_key_scheme)) -> None:
+    if not DEV_API_KEY or api_key != DEV_API_KEY:
+        raise AuthConfig.api_key_forbidden_exception
+
+
+DevAPIKey = Depends(validate_api_key)

@@ -18,6 +18,16 @@ class CatalogService:
 
         return (await session.exec(statement)).one_or_none()
 
+    # noinspection PyUnresolvedReferences
+    @staticmethod
+    @logfire.instrument(record_return=True)
+    async def get_by_ids(
+        session: AsyncSession, product_ids: list[UUID]
+    ) -> Sequence[Product]:
+        statement = select(Product).where(Product.id.in_(product_ids))
+
+        return (await session.exec(statement)).all()
+
     @staticmethod
     @logfire.instrument(record_return=True)
     async def get_feed(

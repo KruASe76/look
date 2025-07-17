@@ -67,7 +67,7 @@ class CollectionService:
         collection_ids: list[UUID],
         product_ids: list[UUID],
     ) -> None:
-        if set(collection_ids) - user.collection_id:
+        if set(collection_ids) - user.collection_ids:
             raise CollectionForbiddenException()
 
         links_to_insert = [

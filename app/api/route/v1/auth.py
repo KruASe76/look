@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status
 
-from app.api.route.dependencies import InitDataUserFull
 from app.model import UserSchema
 
+from ..dependencies import InitDataUserFull
 from ..util import build_responses
 
 auth_router = APIRouter(prefix="/auth", tags=["user"])

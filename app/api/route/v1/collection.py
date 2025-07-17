@@ -2,16 +2,16 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.route.dependencies import (
+from app.model import BriefCollectionSchema, CollectionCreate, CollectionSchema
+from app.service import CollectionService
+
+from .. import messages
+from ..dependencies import (
     DatabaseSession,
     DatabaseTransaction,
     InitDataUser,
     InitDataUserWithCollectionIds,
 )
-from app.model import BriefCollectionSchema, CollectionCreate, CollectionSchema
-from app.service import CollectionService
-
-from .. import messages
 from ..util import build_responses
 
 collection_router = APIRouter(prefix="", tags=["collections"])
