@@ -75,7 +75,7 @@ ValidInitData = Annotated[InitData, Depends(validate_init_data)]
 
 
 async def get_full_user(init_data: ValidInitData, session: DatabaseTransaction) -> User:
-    return await UserService.get_or_create(
+    return await UserService.get_or_upsert(
         session,
         UserCreate(
             telegram_id=init_data.user.id,

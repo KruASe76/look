@@ -44,6 +44,11 @@ class CollectionCreate(CollectionBase):
     pass
 
 
+class CollectionPatch(SQLModel):
+    name: str | None = None
+    cover_image_url: str | None = None
+
+
 class _CollectionIdSchema(SQLModel):
     id: UUID
 

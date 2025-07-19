@@ -13,7 +13,7 @@ auth_router = APIRouter(prefix="/auth", tags=["user"])
     response_model=UserSchema,
     status_code=status.HTTP_200_OK,
     responses=build_responses(include_auth=True),
-    description="Authenticate user and return user data",
+    summary="Authenticate user and return user data",
 )
 async def auth_init_data(user: InitDataUserFull) -> ...:
     return user

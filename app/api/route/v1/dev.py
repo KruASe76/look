@@ -17,8 +17,8 @@ dev_responses = build_responses(include_dev_auth=True)
     "/search/sync",
     response_model=int,
     status_code=status.HTTP_201_CREATED,
-    description="Sync products with search index",
     responses=dev_responses,
+    summary="Sync search index with database",
 )
 async def sync_search(
     since: Annotated[datetime, Body(embed=True)], session: DatabaseSession

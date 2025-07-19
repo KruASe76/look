@@ -44,6 +44,15 @@ class UserCreate(UserBase):
     pass
 
 
+class UserPatch(SQLModel):
+    username: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    photo_url: str | None = None
+
+    preferences: dict[str, Any] | None = None
+
+
 class _UserIdSchema(SQLModel):
     id: int
 

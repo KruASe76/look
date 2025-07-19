@@ -10,17 +10,19 @@ from app.model import (
     User,
     UserCartLink,
     UserCreate,
+    UserPatch,
 )
 
 from ..core.config import DEFAULT_COLLECTION_NAME
 from .collection import CollectionService
+from .util import check_update_needed
 
 
 # noinspection PyTypeChecker,Pydantic
 class UserService:
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def get_or_create(session: AsyncSession, user_create: UserCreate) -> User:
+    async def get_or_upsert(session: AsyncSession, user_create: UserCreate) -> User:
         if user_create.telegram_id is not None:
             statement = (
                 select(User)
@@ -31,9 +33,16 @@ class UserService:
                 )
             )
 
-            user_optional = (await session.exec(statement)).one_or_none()
+            user_optional: User | None = (await session.exec(statement)).one_or_none()
 
             if user_optional is not None:
+                if check_update_needed(user_create, user_optional):
+                    user_optional.sqlmodel_update(
+                        user_create.model_dump(exclude_unset=True)
+                    )
+                    session.add(user_optional)
+                    await session.flush()
+
                 return user_optional
 
         new_user = User.model_validate(user_create)
@@ -50,6 +59,16 @@ class UserService:
         )
 
         return new_user
+
+    @staticmethod
+    @logfire.instrument(record_return=True)
+    async def patch(session: AsyncSession, user: User, user_patch: UserPatch) -> User:
+        if check_update_needed(user_patch, user):
+            user.sqlmodel_update(user_patch.model_dump(exclude_unset=True))
+            session.add(user)
+            await session.flush()
+
+        return user
 
     @staticmethod
     @logfire.instrument(record_return=True)

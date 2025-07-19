@@ -11,12 +11,30 @@ from app.model import (
     AuthenticatedUserWithCollectionIds,
     Collection,
     CollectionCreate,
+    CollectionPatch,
     CollectionProductLink,
 )
+
+from .util import check_update_needed
 
 
 # noinspection PyTypeChecker,PyUnresolvedReferences,Pydantic
 class CollectionService:
+    @staticmethod
+    @logfire.instrument(record_return=True)
+    async def create(
+        session: AsyncSession, owner_id: int, collection_create: CollectionCreate
+    ) -> Collection:
+        new_collection = Collection.model_validate(
+            collection_create, update={"owner_id": owner_id}
+        )
+
+        session.add(new_collection)
+        await session.flush()
+        await session.refresh(new_collection)
+
+        return new_collection
+
     @staticmethod
     @logfire.instrument(record_return=True)
     async def get_by_id(
@@ -32,18 +50,28 @@ class CollectionService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def create(
-        session: AsyncSession, owner_id: int, collection_create: CollectionCreate
-    ) -> Collection:
-        new_collection = Collection.model_validate(
-            collection_create, update={"owner_id": owner_id}
-        )
+    async def patch(
+        session: AsyncSession,
+        user: AuthenticatedUserWithCollectionIds,
+        collection_id: UUID,
+        collection_patch: CollectionPatch,
+    ) -> Collection | None:
+        if collection_id not in user.collection_ids:
+            raise CollectionForbiddenException()
 
-        session.add(new_collection)
-        await session.flush()
-        await session.refresh(new_collection)
+        collection_optional = await CollectionService.get_by_id(session, collection_id)
 
-        return new_collection
+        if collection_optional is None:
+            return None
+
+        if check_update_needed(collection_patch, collection_optional):
+            collection_optional.sqlmodel_update(
+                collection_patch.model_dump(exclude_unset=True)
+            )
+            session.add(collection_optional)
+            await session.flush()
+
+        return collection_optional
 
     @staticmethod
     @logfire.instrument(record_return=True)

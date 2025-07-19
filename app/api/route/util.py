@@ -44,7 +44,7 @@ def build_responses(
 
     if include_dev_auth:
         defaults |= {
-            status.HTTP_403_FORBIDDEN: AuthConfig.api_key_forbidden_exception.detail,
+            status.HTTP_403_FORBIDDEN: AuthConfig.api_key_forbidden_exception.detail
         }
 
     return _build_responses_internal(

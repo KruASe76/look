@@ -6,6 +6,7 @@ __all__ = [
     "BriefUserSchema",
     "Collection",
     "CollectionCreate",
+    "CollectionPatch",
     "CollectionProductLink",
     "CollectionSchema",
     "Product",
@@ -13,6 +14,7 @@ __all__ = [
     "User",
     "UserCartLink",
     "UserCreate",
+    "UserPatch",
     "UserSchema",
 ]
 
@@ -21,6 +23,7 @@ from .collection import (
     BriefCollectionSchema,
     Collection,
     CollectionCreate,
+    CollectionPatch,
     CollectionProductLink,
     CollectionSchema,
 )
@@ -31,6 +34,7 @@ from .user import (
     User,
     UserCartLink,
     UserCreate,
+    UserPatch,
     UserSchema,
 )
 
