@@ -2,11 +2,15 @@ from uuid import UUID
 
 import logfire
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm import joinedload, selectinload
 from sqlmodel import delete, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.core.exceptions import CollectionForbiddenException
+from app.core.exceptions import (
+    CollectionForbiddenException,
+    CollectionNotFoundException,
+)
 from app.model import (
     AuthenticatedUserWithCollectionIds,
     Collection,
@@ -37,16 +41,17 @@ class CollectionService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def get_by_id(
-        session: AsyncSession, collection_id: UUID
-    ) -> Collection | None:
+    async def get_by_id(session: AsyncSession, collection_id: UUID) -> Collection:
         statement = (
             select(Collection)
             .where(Collection.id == collection_id)
             .options(joinedload(Collection.owner), selectinload(Collection.products))
         )
 
-        return (await session.exec(statement)).one_or_none()
+        try:
+            return (await session.exec(statement)).one()
+        except InvalidRequestError as e:
+            raise CollectionNotFoundException from e
 
     @staticmethod
     @logfire.instrument(record_return=True)
@@ -55,23 +60,20 @@ class CollectionService:
         user: AuthenticatedUserWithCollectionIds,
         collection_id: UUID,
         collection_patch: CollectionPatch,
-    ) -> Collection | None:
+    ) -> Collection:
         if collection_id not in user.collection_ids:
-            raise CollectionForbiddenException()
+            raise CollectionForbiddenException
 
-        collection_optional = await CollectionService.get_by_id(session, collection_id)
+        collection = await CollectionService.get_by_id(session, collection_id)
 
-        if collection_optional is None:
-            return None
-
-        if check_update_needed(collection_patch, collection_optional):
-            collection_optional.sqlmodel_update(
+        if check_update_needed(collection_patch, collection):
+            collection.sqlmodel_update(
                 collection_patch.model_dump(exclude_unset=True)
             )
-            session.add(collection_optional)
+            session.add(collection)
             await session.flush()
 
-        return collection_optional
+        return collection
 
     @staticmethod
     @logfire.instrument(record_return=True)
@@ -81,7 +83,7 @@ class CollectionService:
         collection_ids: list[UUID],
     ) -> None:
         if set(collection_ids) - user.collection_ids:
-            raise CollectionForbiddenException()
+            raise CollectionForbiddenException
 
         statement = delete(Collection).where(Collection.id.in_(collection_ids))
 
@@ -96,7 +98,7 @@ class CollectionService:
         product_ids: list[UUID],
     ) -> None:
         if set(collection_ids) - user.collection_ids:
-            raise CollectionForbiddenException()
+            raise CollectionForbiddenException
 
         links_to_insert = [
             {"collection_id": c_id, "product_id": p_id}
@@ -124,7 +126,7 @@ class CollectionService:
         product_ids: list[UUID],
     ) -> None:
         if set(collection_ids) - user.collection_ids:
-            raise CollectionForbiddenException()
+            raise CollectionForbiddenException
 
         statement = delete(CollectionProductLink).where(
             CollectionProductLink.collection_id.in_(collection_ids),
@@ -158,7 +160,7 @@ class CollectionService:
         new_collection_ids: list[UUID],
     ) -> None:
         if set(new_collection_ids) - user.collection_ids:
-            raise CollectionForbiddenException()
+            raise CollectionForbiddenException
 
         current_collection_ids = await CollectionService.check_product_inclusion(
             session, product_id, user

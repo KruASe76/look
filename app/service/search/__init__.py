@@ -7,7 +7,7 @@ from elasticsearch.dsl.query import Match, MultiMatch, Range, Terms
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.model import AuthenticatedUser, Product
+from app.model import Product
 
 from .config import PRODUCT_INDEX_NAME
 from .indices import Product as ProductDocument
@@ -34,7 +34,7 @@ class SearchService:
     @staticmethod
     @logfire.instrument(record_return=True)
     async def search_products(
-        user: AuthenticatedUser,  # noqa: ARG004
+        user_id: int,  # noqa: ARG004
         query: str | None,
         categories: list[str] | None,
         colors: list[str] | None,

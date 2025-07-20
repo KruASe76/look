@@ -1,3 +1,7 @@
+import asyncio
+
+import logfire
+from elastic_transport import ConnectionError as ESConnectionError
 from elasticsearch.dsl import async_connections
 
 from app.core.config import ELASTIC_HOST, ELASTIC_PASSWORD, ELASTIC_USERNAME
@@ -9,7 +13,18 @@ async_connections.create_connection(
 
 
 async def initialize_elastic() -> None:
-    await Product.init()
+    logfire.info("Connecting to Elastic...")
+
+    while True:
+        try:
+            await Product.init()
+
+            logfire.info("Successfully connected to Elastic.")
+            break
+
+        except ESConnectionError:
+            logfire.info("Elastic is not ready yet. Retrying in 3 seconds...")
+            await asyncio.sleep(3)
 
 
 async def dispose_elastic() -> None:

@@ -2,7 +2,7 @@ from fastapi import APIRouter, status
 
 from app.model import UserSchema
 
-from ..dependencies import InitDataUserFull
+from ..auth import InitDataUserFull
 from ..util import build_responses
 
 auth_router = APIRouter(prefix="/auth", tags=["user"])

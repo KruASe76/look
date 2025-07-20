@@ -1,8 +1,11 @@
 import logfire
+from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm import load_only, selectinload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.core.config import DEFAULT_COLLECTION_NAME
+from app.core.exceptions import UserNotFoundException
 from app.model import (
     AuthenticatedUser,
     AuthenticatedUserWithCollectionIds,
@@ -13,7 +16,6 @@ from app.model import (
     UserPatch,
 )
 
-from ..core.config import DEFAULT_COLLECTION_NAME
 from .collection import CollectionService
 from .util import check_update_needed
 
@@ -72,7 +74,7 @@ class UserService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def get_by_id(session: AsyncSession, user_id: int) -> User | None:
+    async def get_by_id(session: AsyncSession, user_id: int) -> User:
         statement = (
             select(User)
             .where(User.id == user_id)
@@ -82,7 +84,10 @@ class UserService:
             )
         )
 
-        return (await session.exec(statement)).one_or_none()
+        try:
+            return (await session.exec(statement)).one()
+        except InvalidRequestError as e:
+            raise UserNotFoundException from e
 
     @staticmethod
     @logfire.instrument(record_return=True)

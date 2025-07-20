@@ -3,15 +3,12 @@ __all__ = ["app"]
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from app.core.config import ALLOW_ORIGINS
+from app.core.config import ALLOW_ORIGINS, APP_TITLE
 
-from .route import root_router
-from .route.exceptions import add_exception_handlers
+from .route import register_exception_handlers, root_router
 from .util import lifespan
 
-app = FastAPI(title="Look", lifespan=lifespan)
-
-add_exception_handlers(app)
+app = FastAPI(title=APP_TITLE, lifespan=lifespan)
 
 # noinspection PyTypeChecker
 app.add_middleware(
@@ -23,3 +20,4 @@ app.add_middleware(
 )
 
 app.include_router(root_router)
+register_exception_handlers(app)

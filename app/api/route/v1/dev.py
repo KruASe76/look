@@ -5,7 +5,8 @@ from fastapi import APIRouter, Body, status
 
 from app.service import SearchService
 
-from ..dependencies import DatabaseSession, DevAPIKey
+from ..auth import DevAPIKey
+from ..dependencies import DatabaseSession
 from ..util import build_responses
 
 dev_router = APIRouter(prefix="/dev", tags=["dev"], dependencies=[DevAPIKey])

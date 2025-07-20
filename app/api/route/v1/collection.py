@@ -1,8 +1,12 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, Body, status
 
+from app.core.exceptions import (
+    CollectionForbiddenException,
+    CollectionNotFoundException,
+)
 from app.model import (
     BriefCollectionSchema,
     CollectionCreate,
@@ -11,30 +15,11 @@ from app.model import (
 )
 from app.service import CollectionService
 
-from .. import messages
-from ..dependencies import (
-    DatabaseSession,
-    DatabaseTransaction,
-    InitDataUser,
-    InitDataUserWithCollectionIds,
-)
+from ..auth import InitDataUser, InitDataUserWithCollectionIds
+from ..dependencies import DatabaseSession, DatabaseTransaction
 from ..util import build_responses
 
 collection_router = APIRouter(prefix="", tags=["collections"])
-
-_responses_with_forbidden = build_responses(
-    {status.HTTP_403_FORBIDDEN: messages.COLLECTIONS_FORBIDDEN}, include_auth=True
-)
-_responses_with_not_found = build_responses(
-    {status.HTTP_404_NOT_FOUND: messages.COLLECTION_NOT_FOUND}, include_auth=True
-)
-_responses_with_forbidden_and_not_found = build_responses(
-    {
-        status.HTTP_403_FORBIDDEN: messages.COLLECTIONS_FORBIDDEN,
-        status.HTTP_404_NOT_FOUND: messages.COLLECTION_NOT_FOUND,
-    },
-    include_auth=True,
-)
 
 
 @collection_router.post(
@@ -54,26 +39,20 @@ async def create_collection(
     "/collection/{collection_id}",
     response_model=CollectionSchema,
     status_code=status.HTTP_200_OK,
-    responses=_responses_with_not_found,
+    responses=build_responses(CollectionNotFoundException, include_auth=True),
     summary="Get collection by id",
 )
 async def get_collection(collection_id: UUID, session: DatabaseSession) -> ...:
-    collection_optional = await CollectionService.get_by_id(session, collection_id)
-
-    if collection_optional is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=messages.COLLECTION_NOT_FOUND,
-        )
-
-    return collection_optional
+    return await CollectionService.get_by_id(session, collection_id)
 
 
 @collection_router.patch(
     "/collection/{collection_id}",
     response_model=CollectionSchema,
     status_code=status.HTTP_200_OK,
-    responses=_responses_with_forbidden_and_not_found,
+    responses=build_responses(
+        CollectionForbiddenException, CollectionNotFoundException, include_auth=True
+    ),
     summary="Partially update collection by id",
 )
 async def patch_collection(
@@ -82,21 +61,13 @@ async def patch_collection(
     user: InitDataUserWithCollectionIds,
     session: DatabaseTransaction,
 ) -> ...:
-    collection_optional = await CollectionService.patch(session, user, collection_id, collection_patch)
-
-    if collection_optional is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=messages.COLLECTION_NOT_FOUND,
-        )
-
-    return collection_optional
+    return await CollectionService.patch(session, user, collection_id, collection_patch)
 
 
 @collection_router.delete(
     "/collections",
     status_code=status.HTTP_204_NO_CONTENT,
-    responses=_responses_with_forbidden,
+    responses=build_responses(CollectionForbiddenException, include_auth=True),
     summary="Delete multiple collections",
 )
 async def delete_collections(
@@ -110,7 +81,7 @@ async def delete_collections(
 @collection_router.post(
     "/collection/products",
     status_code=status.HTTP_204_NO_CONTENT,
-    responses=_responses_with_forbidden,
+    responses=build_responses(CollectionForbiddenException, include_auth=True),
     summary="Add products to multiple collections",
 )
 async def add_products_to_collections(
@@ -125,7 +96,7 @@ async def add_products_to_collections(
 @collection_router.delete(
     "/collection/products",
     status_code=status.HTTP_204_NO_CONTENT,
-    responses=_responses_with_forbidden,
+    responses=build_responses(CollectionForbiddenException, include_auth=True),
     summary="Delete products from multiple collections",
 )
 async def delete_products_from_collections(

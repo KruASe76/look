@@ -9,6 +9,8 @@ __all__ = [
     "CollectionPatch",
     "CollectionProductLink",
     "CollectionSchema",
+    "Interaction",
+    "InteractionType",
     "Product",
     "ProductSchema",
     "User",
@@ -27,6 +29,7 @@ from .collection import (
     CollectionProductLink,
     CollectionSchema,
 )
+from .interaction import Interaction, InteractionType
 from .user import (
     AuthenticatedUser,
     AuthenticatedUserWithCollectionIds,

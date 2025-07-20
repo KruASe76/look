@@ -26,6 +26,11 @@ LOGFIRE_ENVIRONMENT = os.getenv("LOGFIRE_ENVIRONMENT")
 
 ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS", default="*").split(",")
 
+APP_TITLE = "Look"
+
+INIT_DATA_SCHEME_NAME = "TMA"
+INIT_DATA_DESCRIPTION = "Telegram MiniApp init-data"
+
 
 # BUSINESS
 

@@ -10,6 +10,7 @@ services:
       - --entryPoints.websecure.http.tls=true
       - --providers.file.filename=/traefik/dynamic.yml
       - --providers.file.watch=true
+      - --log.level=DEBUG
     ports:
       - 443:443
     volumes:

@@ -1,8 +1,9 @@
-__all__ = ["root_router"]
+__all__ = ["register_exception_handlers", "root_router"]
 
 from fastapi import APIRouter
-from starlette.responses import RedirectResponse
+from fastapi.responses import RedirectResponse
 
+from .exceptions import register_exception_handlers
 from .v1 import v1_router
 
 root_router = APIRouter()
