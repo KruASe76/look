@@ -1,6 +1,6 @@
 from typing import ClassVar, Self
 
-from elasticsearch.dsl import AsyncDocument, Float, Keyword, Text, analysis
+from elasticsearch.dsl import AsyncDocument, Float, Keyword, SearchAsYouType, Text, analysis
 
 from app.model import Product as ProductModel
 
@@ -20,6 +20,7 @@ russian_analyzer = analysis.analyzer(
 class Product(AsyncDocument):
     article = Keyword()
     name = Text(analyzer=russian_analyzer, fields={"raw": Keyword()})
+    name_suggest = SearchAsYouType(analyzer=russian_analyzer)
     brand = Keyword()
     category = Keyword()
     color_name = Keyword()
@@ -38,6 +39,7 @@ class Product(AsyncDocument):
             meta={"id": product.id},
             article=product.article,
             name=product.name,
+            name_suggest=product.name,
             brand=product.brand,
             category=product.category,
             color_name=product.color_name,

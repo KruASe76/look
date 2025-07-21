@@ -3,7 +3,15 @@ from uuid import UUID
 
 import logfire
 from elasticsearch.dsl import AsyncSearch
-from elasticsearch.dsl.query import Match, MultiMatch, Range, Terms
+from elasticsearch.dsl.function import RandomScore
+from elasticsearch.dsl.query import (
+    FunctionScore,
+    Match,
+    MatchAll,
+    MultiMatch,
+    Range,
+    Terms,
+)
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -15,22 +23,6 @@ from .util import is_article
 
 
 class SearchService:
-    # noinspection PyTypeChecker,Pydantic
-    @staticmethod
-    @logfire.instrument()
-    async def sync_products(session: AsyncSession, since: datetime) -> int:
-        """
-        :return: number of products synced
-        """
-
-        statement = select(Product).where(Product.updated_at > since)
-        products = (await session.exec(statement)).all()
-
-        for product in products:
-            await ProductDocument.from_product(product).save()
-
-        return len(products)
-
     @staticmethod
     @logfire.instrument(record_return=True)
     async def search_products(
@@ -94,3 +86,41 @@ class SearchService:
         response = await search.execute()
 
         return [UUID(hit.meta.id) for hit in response.hits]
+
+    @staticmethod
+    @logfire.instrument(record_return=True)
+    async def get_suggestions(query: str, limit: int) -> list[str]:
+        search = AsyncSearch(index=PRODUCT_INDEX_NAME).source(fields=["name_suggest"])
+
+        if query:
+            search = search.query(
+                MultiMatch(
+                    query=query,
+                    fields=["name_suggest", "name_suggest._2gram", "name_suggest._3gram"],
+                    type="bool_prefix",
+                )
+            )
+        else:
+            search = search.query(FunctionScore(query=MatchAll(), functions=[RandomScore()]))
+
+        search = search[0:limit]
+
+        response = await search.execute()
+
+        return [hit.name_suggest for hit in response.hits]
+
+    # noinspection PyTypeChecker,Pydantic
+    @staticmethod
+    @logfire.instrument(record_return=True)
+    async def sync_products(session: AsyncSession, since: datetime) -> int:
+        """
+        :return: number of products synced
+        """
+
+        statement = select(Product).where(Product.updated_at > since)
+        products = (await session.exec(statement)).all()
+
+        for product in products:
+            await ProductDocument.from_product(product).save()
+
+        return len(products)

@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 
-from app.api.schema import SearchQuery
+from app.api.schema import SearchQuery, SearchSuggestionQuery
 from app.core.exceptions import ProductNotFoundException
 from app.model import BriefProductSchema, ProductSchema
 from app.service import CatalogService, SearchService
@@ -39,7 +39,7 @@ async def search_catalog(
     session: DatabaseSession,
 ) -> ...:
     product_ids = await SearchService.search_products(
-        user=user.id,
+        user_id=user.id,
         query=query.query,
         categories=query.categories,
         colors=query.colors,
@@ -51,3 +51,13 @@ async def search_catalog(
     )
 
     return await CatalogService.get_by_ids(session, product_ids)
+
+
+@catalog_router.post(
+    "/search/suggestions",
+    response_model=list[str],
+    status_code=status.HTTP_200_OK,
+    summary="Get search suggestions",
+)
+async def search_suggestions(query: SearchSuggestionQuery) -> ...:
+    return await SearchService.get_suggestions(query.query, query.limit)

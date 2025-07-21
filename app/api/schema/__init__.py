@@ -1,3 +1,3 @@
-__all__ = ["SearchQuery"]
+__all__ = ["SearchQuery", "SearchSuggestionQuery"]
 
-from .search import SearchQuery
+from .search import SearchQuery, SearchSuggestionQuery
