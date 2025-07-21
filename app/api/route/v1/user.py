@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, status
 
 from app.core.exceptions import UserNotFoundException
-from app.model import UserPatch, UserSchema
+from app.model import BriefUserSchema, UserPatch, UserSchema
 from app.service import UserService
 
 from ..auth import InitDataUserFull
@@ -15,7 +15,7 @@ user_router = APIRouter(prefix="/user", tags=["user"])
 
 @user_router.patch(
     "",
-    response_model=UserSchema,
+    response_model=BriefUserSchema,
     status_code=status.HTTP_200_OK,
     responses=build_responses(include_auth=True),
     summary="Partially update user",
