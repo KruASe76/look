@@ -1,6 +1,13 @@
 from typing import ClassVar, Self
 
-from elasticsearch.dsl import AsyncDocument, Float, Keyword, SearchAsYouType, Text, analysis
+from elasticsearch.dsl import (
+    AsyncDocument,
+    Float,
+    Keyword,
+    SearchAsYouType,
+    Text,
+    analysis,
+)
 
 from app.model import Product as ProductModel
 

@@ -58,5 +58,8 @@ class BriefCollectionSchema(CollectionBase, _CollectionIdSchema):
 
 
 class CollectionSchema(BriefCollectionSchema):
-    owner: "BriefUserSchema"
     products: list["BriefProductSchema"] = []
+
+
+class CollectionSchemaWithOwner(CollectionSchema):
+    owner: "BriefUserSchema"

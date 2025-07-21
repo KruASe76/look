@@ -9,6 +9,7 @@ __all__ = [
     "CollectionPatch",
     "CollectionProductLink",
     "CollectionSchema",
+    "CollectionSchemaWithOwner",
     "Interaction",
     "InteractionType",
     "Product",
@@ -28,6 +29,7 @@ from .collection import (
     CollectionPatch,
     CollectionProductLink,
     CollectionSchema,
+    CollectionSchemaWithOwner,
 )
 from .interaction import Interaction, InteractionType
 from .user import (
@@ -43,3 +45,4 @@ from .user import (
 
 UserSchema.model_rebuild()
 CollectionSchema.model_rebuild()
+CollectionSchemaWithOwner.model_rebuild()

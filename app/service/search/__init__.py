@@ -117,7 +117,7 @@ class SearchService:
         :return: number of products synced
         """
 
-        statement = select(Product).where(Product.updated_at > since)
+        statement = select(Product).where(Product.updated_at >= since)
         products = (await session.exec(statement)).all()
 
         for product in products:

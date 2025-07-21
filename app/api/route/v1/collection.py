@@ -11,7 +11,7 @@ from app.model import (
     BriefCollectionSchema,
     CollectionCreate,
     CollectionPatch,
-    CollectionSchema,
+    CollectionSchemaWithOwner,
 )
 from app.service import CollectionService
 
@@ -19,7 +19,7 @@ from ..auth import InitDataUser, InitDataUserWithCollectionIds
 from ..dependencies import DatabaseSession, DatabaseTransaction
 from ..util import build_responses
 
-collection_router = APIRouter(prefix="", tags=["collections"])
+collection_router = APIRouter(prefix="", tags=["collection"])
 
 
 @collection_router.post(
@@ -37,7 +37,7 @@ async def create_collection(
 
 @collection_router.get(
     "/collection/{collection_id}",
-    response_model=CollectionSchema,
+    response_model=CollectionSchemaWithOwner,
     status_code=status.HTTP_200_OK,
     responses=build_responses(CollectionNotFoundException, include_auth=True),
     summary="Get collection by id",
@@ -48,7 +48,7 @@ async def get_collection(collection_id: UUID, session: DatabaseSession) -> ...:
 
 @collection_router.patch(
     "/collection/{collection_id}",
-    response_model=CollectionSchema,
+    response_model=BriefCollectionSchema,
     status_code=status.HTTP_200_OK,
     responses=build_responses(
         CollectionForbiddenException, CollectionNotFoundException, include_auth=True

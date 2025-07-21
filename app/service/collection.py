@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from uuid import UUID
 
 import logfire
@@ -41,17 +42,38 @@ class CollectionService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def get_by_id(session: AsyncSession, collection_id: UUID) -> Collection:
+    async def get_by_id(
+        session: AsyncSession,
+        collection_id: UUID,
+        *,
+        select_products: bool = True,
+        select_owner: bool = True,
+    ) -> Collection:
+        options = []
+        if select_products:
+            options.append(selectinload(Collection.products))
+        if select_owner:
+            options.append(joinedload(Collection.owner))
+
         statement = (
-            select(Collection)
-            .where(Collection.id == collection_id)
-            .options(joinedload(Collection.owner), selectinload(Collection.products))
+            select(Collection).where(Collection.id == collection_id).options(*options)
         )
 
         try:
             return (await session.exec(statement)).one()
         except InvalidRequestError as e:
             raise CollectionNotFoundException from e
+
+    @staticmethod
+    @logfire.instrument(record_return=True)
+    async def get_by_owner_id(session: AsyncSession, owner_id: int) -> Sequence[Collection]:
+        statement = (
+            select(Collection)
+            .where(Collection.owner_id == owner_id)
+            .options(selectinload(Collection.products))  # without owner
+        )
+
+        return (await session.exec(statement)).all()
 
     @staticmethod
     @logfire.instrument(record_return=True)
@@ -64,12 +86,12 @@ class CollectionService:
         if collection_id not in user.collection_ids:
             raise CollectionForbiddenException
 
-        collection = await CollectionService.get_by_id(session, collection_id)
+        collection = await CollectionService.get_by_id(
+            session, collection_id, select_products=False, select_owner=False
+        )
 
         if check_update_needed(collection_patch, collection):
-            collection.sqlmodel_update(
-                collection_patch.model_dump(exclude_unset=True)
-            )
+            collection.sqlmodel_update(collection_patch.model_dump(exclude_unset=True))
             session.add(collection)
             await session.flush()
 
@@ -141,7 +163,7 @@ class CollectionService:
         session: AsyncSession,
         product_id: UUID,
         user: AuthenticatedUserWithCollectionIds,
-    ) -> list[UUID]:
+    ) -> Sequence[UUID]:
         if not user.collection_ids:
             return []
 

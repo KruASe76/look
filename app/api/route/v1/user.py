@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, Body, status
 
 from app.core.exceptions import UserNotFoundException
 from app.model import UserPatch, UserSchema
