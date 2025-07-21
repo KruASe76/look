@@ -34,12 +34,8 @@ class _UserIdModel(SQLModel):
 class User(UserBase, _UserIdModel, table=True):
     __tablename__ = "user"
 
-    collections: list["Collection"] = Relationship(
-        back_populates="owner", cascade_delete=True
-    )
-    cart: list["UserCartLink"] = Relationship(
-        back_populates="user", cascade_delete=True
-    )
+    collections: list["Collection"] = Relationship(back_populates="owner")
+    cart: list["UserCartLink"] = Relationship(back_populates="user")
 
 
 class UserCreate(UserBase):
@@ -89,8 +85,10 @@ class UserCartBase(SQLModel):
 
 
 class _UserCartIds(SQLModel):
-    user_id: int = Field(foreign_key="user.id", primary_key=True)
-    product_id: UUID = Field(foreign_key="product.id", primary_key=True)
+    user_id: int = Field(foreign_key="user.id", ondelete="CASCADE", primary_key=True)
+    product_id: UUID = Field(
+        foreign_key="product.id", ondelete="CASCADE", primary_key=True
+    )
 
 
 class UserCartLink(UserCartBase, _UserCartIds, table=True):

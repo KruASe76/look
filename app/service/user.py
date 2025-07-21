@@ -1,7 +1,7 @@
 import logfire
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm import load_only, selectinload
-from sqlmodel import select
+from sqlmodel import delete, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import DEFAULT_COLLECTION_NAME
@@ -64,16 +64,6 @@ class UserService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def patch(session: AsyncSession, user: User, user_patch: UserPatch) -> User:
-        if check_update_needed(user_patch, user):
-            user.sqlmodel_update(user_patch.model_dump(exclude_unset=True))
-            session.add(user)
-            await session.flush()
-
-        return user
-
-    @staticmethod
-    @logfire.instrument(record_return=True)
     async def get_by_id(session: AsyncSession, user_id: int) -> User:
         statement = (
             select(User)
@@ -124,3 +114,20 @@ class UserService:
             telegram_id=telegram_id,
             collection_ids={collection.id for collection in user.collections},
         )
+
+    @staticmethod
+    @logfire.instrument(record_return=True)
+    async def patch(session: AsyncSession, user: User, user_patch: UserPatch) -> User:
+        if check_update_needed(user_patch, user):
+            user.sqlmodel_update(user_patch.model_dump(exclude_unset=True))
+            session.add(user)
+            await session.flush()
+
+        return user
+
+    @staticmethod
+    @logfire.instrument(record_return=True)
+    async def delete_by_id(session: AsyncSession, user_id: int) -> None:
+        statement = delete(User).where(User.id == user_id)
+
+        await session.exec(statement)

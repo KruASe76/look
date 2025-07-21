@@ -12,8 +12,12 @@ if TYPE_CHECKING:
 class CollectionProductLink(SQLModel, table=True):
     __tablename__ = "collection_product_link"
 
-    collection_id: UUID = Field(foreign_key="collection.id", primary_key=True)
-    product_id: UUID = Field(foreign_key="product.id", primary_key=True)
+    collection_id: UUID = Field(
+        foreign_key="collection.id", ondelete="CASCADE", primary_key=True
+    )
+    product_id: UUID = Field(
+        foreign_key="product.id", ondelete="CASCADE", primary_key=True
+    )
 
 
 # noinspection PyTypeChecker
@@ -30,7 +34,7 @@ class _CollectionIdsModel(SQLModel):
             server_default=text("gen_random_uuid()"),
         )
     )
-    owner_id: int = Field(foreign_key="user.id", index=True)
+    owner_id: int = Field(foreign_key="user.id", ondelete="CASCADE", index=True)
 
 
 class Collection(CollectionBase, _CollectionIdsModel, table=True):

@@ -16,6 +16,7 @@ interaction_router = APIRouter(prefix="/interaction", tags=["interaction"])
 
 @interaction_router.put(
     "/product/{product_id}",
+    response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
     responses=build_responses(ProductNotFoundException, include_auth=True),
     summary="Record an interaction with a product for the user",

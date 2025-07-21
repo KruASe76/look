@@ -66,6 +66,7 @@ async def patch_collection(
 
 @collection_router.delete(
     "/collections",
+    response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
     responses=build_responses(CollectionForbiddenException, include_auth=True),
     summary="Delete multiple collections",
@@ -80,6 +81,7 @@ async def delete_collections(
 
 @collection_router.post(
     "/collection/products",
+    response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
     responses=build_responses(CollectionForbiddenException, include_auth=True),
     summary="Add products to multiple collections",
@@ -95,6 +97,7 @@ async def add_products_to_collections(
 
 @collection_router.delete(
     "/collection/products",
+    response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
     responses=build_responses(CollectionForbiddenException, include_auth=True),
     summary="Delete products from multiple collections",
@@ -123,6 +126,7 @@ async def check_product_in_collections(
 
 @collection_router.put(
     "/product/{product_id}/collections",
+    response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
     responses=build_responses(include_auth=True),
     summary="Update collections that include this product for current user",

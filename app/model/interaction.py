@@ -14,8 +14,10 @@ class InteractionType(StrEnum):
 class Interaction(SQLModel, table=True):
     __tablename__ = "interaction"
 
-    user_id: int = Field(foreign_key="user.id", primary_key=True)
-    product_id: UUID = Field(foreign_key="product.id", primary_key=True)
+    user_id: int = Field(foreign_key="user.id", ondelete="CASCADE", primary_key=True)
+    product_id: UUID = Field(
+        foreign_key="product.id", ondelete="CASCADE", primary_key=True
+    )
 
     interaction_type: InteractionType = Field(
         sa_type=SAEnum(InteractionType), nullable=False
