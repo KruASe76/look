@@ -15,7 +15,7 @@ from elasticsearch.dsl.query import (
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.model import Product
+from app.model import Product, SearchMeta
 
 from .config import PRODUCT_INDEX_NAME
 from .indices import Product as ProductDocument
@@ -23,6 +23,8 @@ from .util import is_article
 
 
 class SearchService:
+    META_CACHE: SearchMeta | None = None
+
     @staticmethod
     @logfire.instrument(record_return=True)
     async def search_products(
@@ -96,18 +98,50 @@ class SearchService:
             search = search.query(
                 MultiMatch(
                     query=query,
-                    fields=["name_suggest", "name_suggest._2gram", "name_suggest._3gram"],
+                    fields=[
+                        "name_suggest",
+                        "name_suggest._2gram",
+                        "name_suggest._3gram",
+                    ],
                     type="bool_prefix",
                 )
             )
         else:
-            search = search.query(FunctionScore(query=MatchAll(), functions=[RandomScore()]))
+            search = search.query(
+                FunctionScore(query=MatchAll(), functions=[RandomScore()])
+            )
 
         search = search[0:limit]
 
         response = await search.execute()
 
         return [hit.name_suggest for hit in response.hits]
+
+    # noinspection Pydantic
+    @classmethod
+    @logfire.instrument(record_return=True)
+    async def get_meta(cls, session: AsyncSession) -> SearchMeta:
+        if not cls.META_CACHE:
+            field_to_column = {
+                "categories": Product.category,
+                "colors": Product.color_name,
+                "brands": Product.brand,
+            }
+
+            cls.META_CACHE = SearchMeta(
+                **{
+                    field: sorted((await session.exec(select(column).distinct())).all())
+                    for field, column in field_to_column.items()
+                }
+            )
+
+        return cls.META_CACHE
+
+    @classmethod
+    @logfire.instrument(record_return=True)
+    async def refresh_meta_cache(cls, session: AsyncSession) -> SearchMeta:
+        cls.META_CACHE = None
+        return await cls.get_meta(session)
 
     # noinspection PyTypeChecker,Pydantic
     @staticmethod

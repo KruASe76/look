@@ -22,7 +22,9 @@ async def initialize_elastic() -> None:
             break
 
         except Exception as e:
-            logfire.info("Elastic is not ready yet. Retrying in 3 seconds...", _exc_info=e)
+            logfire.info(
+                "Elastic is not ready yet. Retrying in 3 seconds...", _exc_info=e
+            )
             await asyncio.sleep(3)
 
 

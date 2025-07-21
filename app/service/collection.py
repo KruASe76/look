@@ -66,7 +66,9 @@ class CollectionService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def get_by_owner_id(session: AsyncSession, owner_id: int) -> Sequence[Collection]:
+    async def get_by_owner_id(
+        session: AsyncSession, owner_id: int
+    ) -> Sequence[Collection]:
         statement = (
             select(Collection)
             .where(Collection.owner_id == owner_id)

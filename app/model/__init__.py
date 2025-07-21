@@ -14,6 +14,7 @@ __all__ = [
     "InteractionType",
     "Product",
     "ProductSchema",
+    "SearchMeta",
     "User",
     "UserCartLink",
     "UserCreate",
@@ -32,6 +33,7 @@ from .collection import (
     CollectionSchemaWithOwner,
 )
 from .interaction import Interaction, InteractionType
+from .misc import SearchMeta
 from .user import (
     AuthenticatedUser,
     AuthenticatedUserWithCollectionIds,

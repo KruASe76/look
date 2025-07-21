@@ -26,7 +26,7 @@ class InitDataUnauthorizedException(UnauthorizedException):
 class ApiKeyUnauthorizedException(UnauthorizedException):
     message = "API key missing"
     headers: ClassVar = {
-        "WWW-Authenticate": 'ApiKey realm="internal authentication", error="missing"',
+        "WWW-Authenticate": 'ApiKey realm="internal authentication", error="missing"'
     }
 
 

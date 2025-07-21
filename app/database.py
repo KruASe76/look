@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 import logfire
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -20,6 +21,7 @@ async def dispose_database() -> None:
     await _engine.dispose()
 
 
+@asynccontextmanager
 async def spawn_session() -> AsyncGenerator[AsyncSession]:
     async with AsyncSession(_engine) as session:
         try:
@@ -29,6 +31,7 @@ async def spawn_session() -> AsyncGenerator[AsyncSession]:
             raise
 
 
+@asynccontextmanager
 async def spawn_session_with_transaction() -> AsyncGenerator[AsyncSession]:
     async with AsyncSession(_engine) as session, session.begin():
         yield session

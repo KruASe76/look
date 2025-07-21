@@ -4,7 +4,7 @@ from fastapi import APIRouter, status
 
 from app.api.schema import SearchQuery, SearchSuggestionQuery
 from app.core.exceptions import ProductNotFoundException
-from app.model import BriefProductSchema, ProductSchema
+from app.model import BriefProductSchema, ProductSchema, SearchMeta
 from app.service import CatalogService, SearchService
 
 from ..auth import InitDataUser
@@ -61,3 +61,13 @@ async def search_catalog(
 )
 async def search_suggestions(query: SearchSuggestionQuery) -> ...:
     return await SearchService.get_suggestions(query.query, query.limit)
+
+
+@catalog_router.get(
+    "/search/meta",
+    response_model=SearchMeta,
+    status_code=status.HTTP_200_OK,
+    summary="Get search metadata",
+)
+async def get_search_meta(session: DatabaseSession) -> ...:
+    return await SearchService.get_meta(session)
