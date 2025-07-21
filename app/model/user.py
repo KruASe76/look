@@ -24,6 +24,8 @@ class UserBase(BriefUserBase):
         default_factory=dict,
     )
 
+    has_completed_onboarding: bool = Field(default=False, nullable=False)
+
 
 class _UserIdModel(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
@@ -51,6 +53,7 @@ class UserPatch(SQLModel):
     photo_url: str | None = None
 
     preferences: dict[str, Any] | None = None
+    has_completed_onboarding: bool | None = None
 
 
 class _UserIdSchema(SQLModel):
