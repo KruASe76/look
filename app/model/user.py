@@ -1,9 +1,11 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import Column, String
+from sqlalchemy import String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
+
+from .misc import UserPreferences
 
 if TYPE_CHECKING:
     from . import BriefCollectionSchema, BriefProductSchema, Collection, Product
@@ -19,12 +21,9 @@ class BriefUserBase(SQLModel):
 
 
 class UserBase(BriefUserBase):
-    preferences: dict[str, Any] = Field(
-        sa_column=Column(JSONB, server_default="{}", nullable=False),
-        default_factory=dict,
+    preferences: UserPreferences | None = Field(
+        sa_type=JSONB, default_factory=UserPreferences, nullable=True
     )
-
-    has_completed_onboarding: bool = Field(default=False, nullable=False)
 
 
 class _UserIdModel(SQLModel):
@@ -48,8 +47,7 @@ class UserPatch(SQLModel):
     last_name: str | None = None
     photo_url: str | None = None
 
-    preferences: dict[str, Any] | None = None
-    has_completed_onboarding: bool | None = None
+    preferences: UserPreferences | None = None
 
 
 class _UserIdSchema(SQLModel):
