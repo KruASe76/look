@@ -59,6 +59,7 @@ class UserService:
             owner_id=new_user.id,
             collection_create=CollectionCreate(name=DEFAULT_COLLECTION_NAME),
         )
+        await session.refresh(new_user, ["collections"])
 
         return new_user
 

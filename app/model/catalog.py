@@ -8,7 +8,7 @@ from sqlmodel import Field, SQLModel
 
 
 # noinspection PyTypeChecker
-class BriefProductBase(SQLModel):
+class _BriefProductBase(SQLModel):
     id: UUID = Field(
         sa_column=Column(
             PG_UUID(as_uuid=True),
@@ -50,17 +50,17 @@ class BriefProductBase(SQLModel):
 
 
 # noinspection PyTypeChecker
-class ProductBase(BriefProductBase):
+class _ProductBase(_BriefProductBase):
     description: str = Field(max_length=4096, sa_type=String(4096), nullable=False)
 
 
-class Product(ProductBase, table=True):
+class Product(_ProductBase, table=True):
     __tablename__ = "product"
 
 
-class BriefProductSchema(BriefProductBase):
+class BriefProductSchema(_BriefProductBase):
     pass
 
 
-class ProductSchema(ProductBase):
+class ProductSchema(_ProductBase):
     pass

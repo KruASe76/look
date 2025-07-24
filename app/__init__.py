@@ -10,6 +10,7 @@ logfire.configure(
     service_name=LOGFIRE_SERVICE_NAME,
     environment=LOGFIRE_ENVIRONMENT,
     send_to_logfire="if-token-present",
+    distributed_tracing=False,
 )
 
 logfire.instrument_pydantic()

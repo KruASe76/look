@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import String
+from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 # noinspection PyTypeChecker
-class BriefUserBase(SQLModel):
+class _UserBase(SQLModel):
     telegram_id: int | None = Field(unique=True)
     username: str | None = Field(max_length=64, sa_type=String(64))
     first_name: str = Field(max_length=64, sa_type=String(64), nullable=False)
@@ -20,24 +20,35 @@ class BriefUserBase(SQLModel):
     photo_url: str | None
 
 
-class UserBase(BriefUserBase):
-    preferences: UserPreferences | None = Field(
-        sa_type=JSONB, default_factory=UserPreferences, nullable=True
-    )
+class _UserPreferencesSchema(SQLModel):
+    preferences: UserPreferences | None = Field(default_factory=UserPreferences)
 
 
 class _UserIdModel(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
 
 
-class User(UserBase, _UserIdModel, table=True):
+class User(_UserBase, _UserIdModel, table=True):
     __tablename__ = "user"
+
+    preferences_data: dict | None = Field(
+        sa_column=Column(JSONB, name="preferences", server_default=None, nullable=True),
+        default_factory=lambda: UserPreferences().model_dump(),
+    )
 
     collections: list["Collection"] = Relationship(back_populates="owner")
     cart: list["UserCartLink"] = Relationship(back_populates="user")
 
+    @property
+    def preferences(self) -> UserPreferences:
+        return UserPreferences(**self.preferences_data or {})
 
-class UserCreate(UserBase):
+    @preferences.setter
+    def preferences(self, value: UserPreferences) -> None:
+        self.preferences_data = value.model_dump()
+
+
+class UserCreate(_UserPreferencesSchema, _UserBase):
     pass
 
 
@@ -54,11 +65,11 @@ class _UserIdSchema(SQLModel):
     id: int
 
 
-class BriefUserSchema(BriefUserBase, _UserIdSchema):
+class BriefUserSchema(_UserBase, _UserIdSchema):
     pass
 
 
-class UserSchema(UserBase, _UserIdSchema):
+class UserSchema(_UserPreferencesSchema, BriefUserSchema):
     collections: list["BriefCollectionSchema"] = []
     # cart: list["UserCartSchema"] = []  # maybe later
 
@@ -78,7 +89,7 @@ class AuthenticatedUserWithCollectionIds(AuthenticatedUser):
 # CART
 
 
-class UserCartBase(SQLModel):
+class _UserCartBase(SQLModel):
     quantity: int = Field(ge=1, default=1, nullable=False)
 
 
@@ -89,12 +100,12 @@ class _UserCartIds(SQLModel):
     )
 
 
-class UserCartLink(UserCartBase, _UserCartIds, table=True):
+class UserCartLink(_UserCartBase, _UserCartIds, table=True):
     __tablename__ = "user_cart"
 
     user: User = Relationship(back_populates="cart")
     product: "Product" = Relationship()
 
 
-class UserCartSchema(UserCartBase):
+class UserCartSchema(_UserCartBase):
     product: "BriefProductSchema"
