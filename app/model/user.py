@@ -46,7 +46,8 @@ class User(_UserBase, _UserIdModel, table=True):
 
     @preferences.setter
     def preferences(self, value: UserPreferences) -> None:
-        self.preferences_data = value.model_dump()
+        if value is not None:
+            self.preferences_data = value.model_dump()
 
 
 class UserCreate(_UserPreferencesSchema, _UserBase):
@@ -54,6 +55,7 @@ class UserCreate(_UserPreferencesSchema, _UserBase):
 
 
 class UserPatch(SQLModel):
+    telegram_id: int | None = None
     username: str | None = None
     first_name: str | None = None
     last_name: str | None = None
@@ -70,7 +72,11 @@ class BriefUserSchema(_UserBase, _UserIdSchema):
     pass
 
 
-class UserSchema(_UserPreferencesSchema, BriefUserSchema):
+class UserWithPreferencesSchema(_UserPreferencesSchema, BriefUserSchema):
+    pass
+
+
+class UserSchema(UserWithPreferencesSchema):
     collections: list["BriefCollectionSchema"] = []
     # cart: list["UserCartSchema"] = []  # maybe later
 

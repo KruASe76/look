@@ -20,6 +20,7 @@ __all__ = [
     "UserCreate",
     "UserPatch",
     "UserSchema",
+    "UserWithPreferencesSchema",
 ]
 
 from .catalog import BriefProductSchema, Product, ProductSchema
@@ -43,6 +44,7 @@ from .user import (
     UserCreate,
     UserPatch,
     UserSchema,
+    UserWithPreferencesSchema,
 )
 
 UserSchema.model_rebuild()

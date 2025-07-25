@@ -42,12 +42,15 @@ class UserService:
                     user_optional.sqlmodel_update(
                         user_create.model_dump(exclude_unset=True)
                     )
+                    user_optional.preferences = user_create.preferences
+
                     session.add(user_optional)
                     await session.flush()
 
                 return user_optional
 
         new_user = User.model_validate(user_create)
+        new_user.preferences = user_create.preferences
 
         session.add(new_user)
         await session.flush()
@@ -124,6 +127,8 @@ class UserService:
     async def patch(session: AsyncSession, user: User, user_patch: UserPatch) -> User:
         if check_update_needed(user_patch, user):
             user.sqlmodel_update(user_patch.model_dump(exclude_unset=True))
+            user.preferences = user_patch.preferences
+
             session.add(user)
             await session.flush()
 

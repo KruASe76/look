@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, status
 
 from app.core.exceptions import UserNotFoundException
-from app.model import BriefUserSchema, UserPatch, UserSchema
+from app.model import UserPatch, UserSchema, UserWithPreferencesSchema
 from app.service import UserService
 
 from ..auth import InitDataUser, InitDataUserFull
@@ -26,7 +26,7 @@ async def get_user(user_id: int, session: DatabaseTransaction) -> ...:
 
 @user_router.patch(
     "",
-    response_model=BriefUserSchema,
+    response_model=UserWithPreferencesSchema,
     status_code=status.HTTP_200_OK,
     responses=build_responses(include_auth=True),
     summary="Partially update user",
