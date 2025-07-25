@@ -7,7 +7,7 @@ from app.model import BriefUserSchema, UserPatch, UserSchema
 from app.service import UserService
 
 from ..auth import InitDataUser, InitDataUserFull
-from ..dependencies import DatabaseSession
+from ..dependencies import DatabaseTransaction
 from ..util import build_responses
 
 user_router = APIRouter(prefix="/user", tags=["user"])
@@ -20,7 +20,7 @@ user_router = APIRouter(prefix="/user", tags=["user"])
     responses=build_responses(UserNotFoundException),
     summary="Get user by id",
 )
-async def get_user(user_id: int, session: DatabaseSession) -> ...:
+async def get_user(user_id: int, session: DatabaseTransaction) -> ...:
     return await UserService.get_by_id(session, user_id)
 
 
@@ -34,7 +34,7 @@ async def get_user(user_id: int, session: DatabaseSession) -> ...:
 async def patch_user(
     user_patch: Annotated[UserPatch, Body()],
     user: InitDataUserFull,
-    session: DatabaseSession,
+    session: DatabaseTransaction,
 ) -> ...:
     return await UserService.patch(session, user, user_patch)
 
@@ -46,5 +46,5 @@ async def patch_user(
     responses=build_responses(include_auth=True),
     summary="Delete user",
 )
-async def delete_user(user: InitDataUser, session: DatabaseSession) -> ...:
+async def delete_user(user: InitDataUser, session: DatabaseTransaction) -> ...:
     await UserService.delete_by_id(session, user.id)

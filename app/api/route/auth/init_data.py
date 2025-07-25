@@ -18,7 +18,7 @@ from app.model import (
 )
 from app.service import UserService
 
-from ..dependencies import DatabaseSession, DatabaseTransaction
+from ..dependencies import DatabaseTransaction
 from .config import AuthConfig
 
 
@@ -60,7 +60,7 @@ async def get_full_user(init_data: ValidInitData, session: DatabaseTransaction) 
 
 
 async def get_authenticated_user(
-    init_data: ValidInitData, session: DatabaseSession
+    init_data: ValidInitData, session: DatabaseTransaction
 ) -> AuthenticatedUser:
     user = await UserService.get_authenticated(session, init_data.user.id)
 
@@ -71,7 +71,7 @@ async def get_authenticated_user(
 
 
 async def get_authenticated_user_with_collection_ids(
-    init_data: ValidInitData, session: DatabaseSession
+    init_data: ValidInitData, session: DatabaseTransaction
 ) -> AuthenticatedUserWithCollectionIds:
     user = await UserService.get_authenticated_with_collection_ids(
         session, init_data.user.id
