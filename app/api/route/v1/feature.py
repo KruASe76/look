@@ -3,7 +3,7 @@ import random
 from fastapi import APIRouter, status
 
 from app.core.config import SpecialUserIds
-from app.model import CollectionSchema
+from app.model import BriefCollectionSchema
 from app.service import CollectionService
 
 from ..auth import InitDataUser
@@ -14,7 +14,7 @@ feature_router = APIRouter(prefix="/feature", tags=["feature"])
 
 @feature_router.get(
     "/trends/global",
-    response_model=list[CollectionSchema],
+    response_model=list[BriefCollectionSchema],
     status_code=status.HTTP_200_OK,
     summary="Get trends collections",
 )
@@ -26,7 +26,7 @@ async def get_global_trends(session: DatabaseSession) -> ...:
 
 @feature_router.get(
     "/brands/global",
-    response_model=list[CollectionSchema],
+    response_model=list[BriefCollectionSchema],
     status_code=status.HTTP_200_OK,
     summary="Get brands collections",
 )
@@ -38,7 +38,7 @@ async def get_global_brands(session: DatabaseSession) -> ...:
 
 @feature_router.get(
     "/trends/personal",
-    response_model=list[CollectionSchema],
+    response_model=list[BriefCollectionSchema],
     status_code=status.HTTP_200_OK,
     summary="Get trends collections",
 )
@@ -54,7 +54,7 @@ async def get_personal_trends(user: InitDataUser, session: DatabaseSession) -> .
 
 @feature_router.get(
     "/brands/personal",
-    response_model=list[CollectionSchema],
+    response_model=list[BriefCollectionSchema],
     status_code=status.HTTP_200_OK,
     summary="Get brands collections",
 )

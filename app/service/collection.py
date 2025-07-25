@@ -69,11 +69,7 @@ class CollectionService:
     async def get_by_owner_id(
         session: AsyncSession, owner_id: int
     ) -> Sequence[Collection]:
-        statement = (
-            select(Collection)
-            .where(Collection.owner_id == owner_id)
-            .options(selectinload(Collection.products))  # without owner
-        )
+        statement = select(Collection).where(Collection.owner_id == owner_id)
 
         return (await session.exec(statement)).all()
 
