@@ -4,7 +4,7 @@ from sqlalchemy.orm import load_only, selectinload
 from sqlmodel import delete, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.core.config import DEFAULT_COLLECTION_NAME
+from app.core.config import Defaults
 from app.core.exceptions import UserNotFoundException
 from app.model import (
     AuthenticatedUser,
@@ -57,7 +57,10 @@ class UserService:
         await CollectionService.create(
             session,
             owner_id=new_user.id,
-            collection_create=CollectionCreate(name=DEFAULT_COLLECTION_NAME),
+            collection_create=CollectionCreate(
+                name=Defaults.collection_name,
+                cover_image_url=Defaults.collection_cover_image_url,
+            ),
         )
         await session.refresh(new_user, ["collections"])
 

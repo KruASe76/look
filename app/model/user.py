@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
+from pydantic import field_validator
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
@@ -72,6 +73,16 @@ class BriefUserSchema(_UserBase, _UserIdSchema):
 class UserSchema(_UserPreferencesSchema, BriefUserSchema):
     collections: list["BriefCollectionSchema"] = []
     # cart: list["UserCartSchema"] = []  # maybe later
+
+    @staticmethod
+    @field_validator("collections", mode="before")
+    def sort_collections(value: ...) -> list["Collection"]:
+        if value and isinstance(value, list):
+            return sorted(
+                value,
+                key=lambda c: c.created_at,
+            )
+        return value
 
 
 # AUTH

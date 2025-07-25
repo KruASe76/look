@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import Column, String, text
+from sqlalchemy import Column, DateTime, String, func, text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -40,6 +41,14 @@ class _CollectionIdsModel(SQLModel):
 
 class Collection(_CollectionBase, _CollectionIdsModel, table=True):
     __tablename__ = "collection"
+
+    created_at: datetime | None = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            server_default=func.now(),
+            nullable=False,
+        )
+    )
 
     owner: "User" = Relationship(back_populates="collections")
     products: list["Product"] = Relationship(link_model=CollectionProductLink)

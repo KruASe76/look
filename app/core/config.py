@@ -34,7 +34,15 @@ APP_TITLE = "Look"
 INIT_DATA_SCHEME_NAME = "tma"
 INIT_DATA_DESCRIPTION = "Telegram MiniApp init-data"
 
-DEFAULT_COLLECTION_NAME = "__FAVOURITES__"
+
+class Defaults:
+    collection_name = "__FAVOURITES__"
+    collection_cover_image_url = (
+        "https://static.vecteezy.com/system/resources/previews/023/465/809/original/"
+        "add-bookmark-dark-mode-glyph-ui-icon-saving-webpage-reading-list-user-interface-"
+        "design-white-silhouette-symbol-on-black-space-solid-pictogram-for-web-mobile-"
+        "isolated-illustration-vector.jpg"
+    )
 
 
 class SpecialUserIds:
