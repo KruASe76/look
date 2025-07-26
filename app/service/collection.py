@@ -72,7 +72,7 @@ class CollectionService:
         statement = (
             select(Collection)
             .where(Collection.owner_id == owner_id)
-            .order_by(Collection.created_at)
+            .order_by(Collection.created_at.asc())
         )
 
         return (await session.exec(statement)).all()

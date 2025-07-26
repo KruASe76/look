@@ -37,7 +37,10 @@ class User(_UserBase, _UserIdModel, table=True):
         default_factory=lambda: UserPreferences().model_dump(),
     )
 
-    collections: list["Collection"] = Relationship(back_populates="owner")
+    collections: list["Collection"] = Relationship(
+        back_populates="owner",
+        sa_relationship_kwargs={"order_by": "Collection.created_at.asc()"},
+    )
     cart: list["UserCartLink"] = Relationship(back_populates="user")
 
     @property
@@ -79,16 +82,6 @@ class UserWithPreferencesSchema(_UserPreferencesSchema, BriefUserSchema):
 class UserSchema(UserWithPreferencesSchema):
     collections: list["BriefCollectionSchema"] = []
     # cart: list["UserCartSchema"] = []  # maybe later
-
-    @staticmethod
-    @field_validator("collections", mode="before")
-    def sort_collections(value: ...) -> list["Collection"]:
-        if value and isinstance(value, list):
-            return sorted(
-                value,
-                key=lambda c: c.created_at,
-            )
-        return value
 
 
 # AUTH
