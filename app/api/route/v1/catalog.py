@@ -44,6 +44,7 @@ async def search_catalog(
         categories=query.categories,
         colors=query.colors,
         brands=query.brands,
+        sizes=query.sizes,
         min_price=query.min_price,
         max_price=query.max_price,
         limit=pagination.limit,

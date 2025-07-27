@@ -31,6 +31,7 @@ class Product(AsyncDocument):
     brand = Keyword()
     category = Keyword()
     color_name = Keyword()
+    sizes = Keyword(multi=True)
     description = Text(analyzer=russian_analyzer)
     price = Float()
 
@@ -50,6 +51,7 @@ class Product(AsyncDocument):
             brand=product.brand,
             category=product.category,
             color_name=product.color_name,
+            sizes=product.sizes,
             description=product.description,
             price=product.discount_price,
         )

@@ -33,6 +33,7 @@ class SearchService:
         categories: list[str] | None,
         colors: list[str] | None,
         brands: list[str] | None,
+        sizes: list[str] | None,
         min_price: float | None,
         max_price: float | None,
         limit: int,
@@ -69,6 +70,9 @@ class SearchService:
 
         if brands:
             filters.append(Terms("brand", brands))
+
+        if sizes:
+            filters.append(Terms("sizes", sizes))
 
         if min_price is not None or max_price is not None:
             price_range = {}
