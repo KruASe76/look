@@ -29,7 +29,7 @@ class _UserIdModel(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
 
 
-class User(_BriefUserBase, _UserIdModel, table=True):
+class User(_UserBase, _UserIdModel, table=True):
     __tablename__ = "user"
 
     collections: list["Collection"] = Relationship(
