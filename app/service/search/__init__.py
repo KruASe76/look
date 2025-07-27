@@ -5,6 +5,7 @@ import logfire
 from elasticsearch.dsl import AsyncSearch
 from elasticsearch.dsl.function import RandomScore
 from elasticsearch.dsl.query import (
+    Bool,
     FunctionScore,
     Match,
     MatchAll,
@@ -82,10 +83,10 @@ class SearchService:
             if max_price is not None:
                 price_range["lte"] = max_price
 
-            filters.append(Range("price", **price_range))
+            filters.append(Range("price", price_range))
 
         if filters:
-            search = search.filter(*filters)
+            search = search.filter(Bool(filter=filters))
 
         search = search[offset : offset + limit]
 
