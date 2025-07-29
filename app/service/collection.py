@@ -42,7 +42,7 @@ class CollectionService:
             .order_by(Collection.created_at.asc())
             .limit(1)
         )
-        result = (await session.exec(statement)).scalar_one_or_none()
+        result = (await session.exec(statement)).one_or_none()
 
         if result is None:
             raise CollectionNotFoundException
@@ -218,7 +218,7 @@ class CollectionService:
             CollectionProductLink.product_id == product_id,
             CollectionProductLink.collection_id.in_(user.collection_ids),
         )
-        return (await session.exec(statement)).scalars().all()
+        return (await session.exec(statement)).all()
 
     @staticmethod
     @logfire.instrument(record_return=True)
