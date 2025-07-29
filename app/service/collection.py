@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload, selectinload
 from sqlmodel import delete, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.core.config import Defaults
 from app.core.exceptions import (
     CollectionForbiddenException,
     CollectionNotFoundException,
@@ -71,8 +72,11 @@ class CollectionService:
     ) -> Sequence[Collection]:
         statement = (
             select(Collection)
-            .where(Collection.owner_id == owner_id)
-            .order_by(Collection.created_at.asc())
+            .where(
+                Collection.owner_id == owner_id,
+                Collection.name != Defaults.collection_name,
+            )
+            .order_by(Collection.created_at.desc())
         )
 
         return (await session.exec(statement)).all()

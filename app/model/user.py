@@ -5,8 +5,12 @@ from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
 
+from app.core.config import Defaults
+
+from .collection import Collection
+
 if TYPE_CHECKING:
-    from . import BriefCollectionSchema, BriefProductSchema, Collection, Product
+    from . import BriefCollectionSchema, BriefProductSchema, Product
 
 
 # noinspection PyTypeChecker
@@ -29,12 +33,18 @@ class _UserIdModel(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
 
 
+# noinspection PyUnresolvedReferences,Pydantic
 class User(_UserBase, _UserIdModel, table=True):
     __tablename__ = "user"
 
     collections: list["Collection"] = Relationship(
         back_populates="owner",
-        sa_relationship_kwargs={"order_by": "Collection.created_at.asc()"},
+        sa_relationship_kwargs={
+            "order_by": lambda: (
+                (Collection.name == Defaults.collection_name).desc(),
+                Collection.created_at.desc(),
+            )
+        },
     )
     cart: list["UserCartLink"] = Relationship(back_populates="user")
 
