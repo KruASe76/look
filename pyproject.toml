@@ -9,8 +9,8 @@ dependencies = [
     "elasticsearch[async]>=9.0.2",
     "fastapi[standard]>=0.116.1",
     "init-data-py>=0.2.6",
-    "logfire[fastapi,sqlalchemy,system-metrics]>=3.25.0",
-    "orjson>=3.11.0",
+    "logfire[fastapi,sqlalchemy,system-metrics]>=4.0.0",
+    "orjson>=3.11.1",
     "pydantic>=2.11.7",
     "pyyaml>=6.0.2",
     "sqlmodel>=0.0.24",
@@ -53,7 +53,6 @@ ignore = [
     "ANN002",  # allow missing annotation for *args
     "ANN003",  # allow missing annotation for **kwargs
     "N818",    # do not enforce "Error" suffix for custom exceptions
-    "RUF002",  # do not warn about ambiguous characters
 ]
 
 # Allow unused variables when underscore-prefixed.

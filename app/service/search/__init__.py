@@ -126,7 +126,7 @@ class SearchService:
     @classmethod
     @logfire.instrument(record_return=True)
     async def get_meta(cls, session: AsyncSession) -> SearchMeta:
-        if not cls.META_CACHE:
+        if cls.META_CACHE is None:
             field_to_column = {
                 "categories": Product.category,
                 "colors": Product.color_name,

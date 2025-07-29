@@ -111,15 +111,15 @@ class UserService:
             .options(load_only(User.id), selectinload(User.collections))
         )
 
-        user = (await session.exec(statement)).one_or_none()
+        user_optional = (await session.exec(statement)).one_or_none()
 
-        if user is None:
+        if user_optional is None:
             return None
 
         return AuthenticatedUserWithCollectionIds(
-            id=user.id,
+            id=user_optional.id,
             telegram_id=telegram_id,
-            collection_ids={collection.id for collection in user.collections},
+            collection_ids={collection.id for collection in user_optional.collections},
         )
 
     @staticmethod

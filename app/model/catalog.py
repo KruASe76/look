@@ -1,6 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
+from pydantic import PrivateAttr
 from sqlalchemy import Column, DateTime, String, func, text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
@@ -57,10 +58,25 @@ class _ProductBase(_BriefProductBase):
 class Product(_ProductBase, table=True):
     __tablename__ = "product"
 
+    # non-db fields
+    _is_contained_in_user_collections: bool = PrivateAttr(default=False)
 
-class BriefProductSchema(_BriefProductBase):
+    @property
+    def is_contained_in_user_collections(self) -> bool:
+        return self._is_contained_in_user_collections
+
+    @is_contained_in_user_collections.setter
+    def is_contained_in_user_collections(self, value: bool) -> None:
+        self._is_contained_in_user_collections = value
+
+
+class _ProductSchemaExtra(SQLModel):
+    is_contained_in_user_collections: bool = False
+
+
+class BriefProductSchema(_ProductSchemaExtra, _BriefProductBase):
     pass
 
 
-class ProductSchema(_ProductBase):
+class ProductSchema(_ProductSchemaExtra, _ProductBase):
     pass

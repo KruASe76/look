@@ -16,7 +16,7 @@ from app.model import (
 from app.service import CollectionService
 
 from ..auth import InitDataUser, InitDataUserWithCollectionIds
-from ..dependencies import DatabaseSession, DatabaseTransaction
+from ..dependencies import DatabaseTransaction
 from ..util import build_responses
 
 collection_router = APIRouter(prefix="", tags=["collection"])
@@ -30,7 +30,7 @@ collection_router = APIRouter(prefix="", tags=["collection"])
     summary="Create a collection",
 )
 async def create_collection(
-    collection_create: CollectionCreate, user: InitDataUser, session: DatabaseSession
+    collection_create: CollectionCreate, user: InitDataUser, session: DatabaseTransaction
 ) -> ...:
     return await CollectionService.create(session, user.id, collection_create)
 
@@ -42,8 +42,8 @@ async def create_collection(
     responses=build_responses(CollectionNotFoundException, include_auth=True),
     summary="Get collection by id",
 )
-async def get_collection(collection_id: UUID, session: DatabaseSession) -> ...:
-    return await CollectionService.get_by_id(session, collection_id)
+async def get_collection(collection_id: UUID, user: InitDataUser, session: DatabaseTransaction) -> ...:
+    return await CollectionService.get_by_id(session, user.id, collection_id)
 
 
 @collection_router.patch(
@@ -74,7 +74,7 @@ async def patch_collection(
 async def delete_collections(
     collection_ids: list[UUID],
     user: InitDataUserWithCollectionIds,
-    session: DatabaseSession,
+    session: DatabaseTransaction,
 ) -> None:
     await CollectionService.delete_bulk(session, user, collection_ids)
 
@@ -90,7 +90,7 @@ async def add_products_to_collections(
     collection_ids: list[UUID],
     product_ids: list[UUID],
     user: InitDataUserWithCollectionIds,
-    session: DatabaseSession,
+    session: DatabaseTransaction,
 ) -> None:
     await CollectionService.add_products(session, user, collection_ids, product_ids)
 
@@ -106,7 +106,7 @@ async def delete_products_from_collections(
     collection_ids: list[UUID],
     product_ids: list[UUID],
     user: InitDataUserWithCollectionIds,
-    session: DatabaseSession,
+    session: DatabaseTransaction,
 ) -> None:
     await CollectionService.delete_products(session, user, collection_ids, product_ids)
 
@@ -119,9 +119,9 @@ async def delete_products_from_collections(
     summary="Get collections that include this product for current user",
 )
 async def check_product_in_collections(
-    product_id: UUID, user: InitDataUserWithCollectionIds, session: DatabaseSession
+    product_id: UUID, user: InitDataUserWithCollectionIds, session: DatabaseTransaction
 ) -> ...:
-    return await CollectionService.check_product_inclusion(session, product_id, user)
+    return await CollectionService.check_product_inclusion(session, user, product_id)
 
 
 @collection_router.put(
@@ -138,5 +138,5 @@ async def update_product_in_collections(
     session: DatabaseTransaction,
 ) -> None:
     await CollectionService.update_collection_inclusion(
-        session, product_id, user, collection_ids
+        session, user, product_id, collection_ids
     )

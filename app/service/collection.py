@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from typing import ClassVar, TypeVar
 from uuid import UUID
 
 import logfire
@@ -19,6 +20,7 @@ from app.model import (
     CollectionCreate,
     CollectionPatch,
     CollectionProductLink,
+    Product,
 )
 
 from .util import check_update_needed
@@ -26,6 +28,36 @@ from .util import check_update_needed
 
 # noinspection PyTypeChecker,PyUnresolvedReferences,Pydantic
 class CollectionService:
+    _default_collection_cache: ClassVar[dict[int, UUID]] = {}
+    _DEFAULT_CACHE_MAX_SIZE = 2048
+
+    @staticmethod
+    async def _get_default_collection_id(session: AsyncSession, user_id: int) -> UUID:
+        if user_id in CollectionService._default_collection_cache:
+            return CollectionService._default_collection_cache[user_id]
+
+        statement = (
+            select(Collection.id)
+            .where(Collection.owner_id == user_id)
+            .order_by(Collection.created_at.asc())
+            .limit(1)
+        )
+        result = (await session.exec(statement)).scalar_one_or_none()
+
+        if result is None:
+            raise CollectionNotFoundException
+
+        if (
+            len(CollectionService._default_collection_cache)
+            >= CollectionService._DEFAULT_CACHE_MAX_SIZE
+        ):
+            CollectionService._default_collection_cache.pop(
+                next(iter(CollectionService._default_collection_cache))
+            )
+
+        CollectionService._default_collection_cache[user_id] = result
+        return result
+
     @staticmethod
     @logfire.instrument(record_return=True)
     async def create(
@@ -45,6 +77,7 @@ class CollectionService:
     @logfire.instrument(record_return=True)
     async def get_by_id(
         session: AsyncSession,
+        user_id: int,
         collection_id: UUID,
         *,
         select_products: bool = True,
@@ -61,9 +94,17 @@ class CollectionService:
         )
 
         try:
-            return (await session.exec(statement)).one()
+            collection = (await session.exec(statement)).one()
         except InvalidRequestError as e:
             raise CollectionNotFoundException from e
+
+        if collection.owner_id == user_id:
+            for product in collection.products:
+                product.is_contained_in_user_collections = True
+        else:
+            await CollectionService.fill_inclusion(session, collection.products, user_id)
+
+        return collection
 
     @staticmethod
     @logfire.instrument(record_return=True)
@@ -167,8 +208,8 @@ class CollectionService:
     @logfire.instrument(record_return=True)
     async def check_product_inclusion(
         session: AsyncSession,
-        product_id: UUID,
         user: AuthenticatedUserWithCollectionIds,
+        product_id: UUID,
     ) -> Sequence[UUID]:
         if not user.collection_ids:
             return []
@@ -183,8 +224,8 @@ class CollectionService:
     @logfire.instrument(record_return=True)
     async def update_collection_inclusion(
         session: AsyncSession,
-        product_id: UUID,
         user: AuthenticatedUserWithCollectionIds,
+        product_id: UUID,
         new_collection_ids: list[UUID],
     ) -> None:
         if set(new_collection_ids) - user.collection_ids:
@@ -208,3 +249,25 @@ class CollectionService:
             await CollectionService.delete_products(
                 session, user, collections_to_remove, [product_id]
             )
+
+    @staticmethod
+    @logfire.instrument(record_return=True)
+    async def fill_inclusion(
+        session: AsyncSession, products: list[Product], user_id: int
+    ) -> None:
+        if not products:
+            return
+
+        default_collection_id = await CollectionService._get_default_collection_id(
+            session, user_id
+        )
+
+        statement = select(CollectionProductLink.product_id).where(
+            CollectionProductLink.collection_id == default_collection_id,
+            CollectionProductLink.product_id.in_([p.id for p in products]),
+        )
+        product_ids_in_collection = set((await session.exec(statement)).all())
+
+        for product in products:
+            if product.id in product_ids_in_collection:
+                product.is_contained_in_user_collections = True

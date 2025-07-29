@@ -5,10 +5,10 @@ from fastapi import APIRouter, status
 from app.api.schema import SearchQuery, SearchSuggestionQuery
 from app.core.exceptions import ProductNotFoundException
 from app.model import BriefProductSchema, ProductSchema, SearchMeta
-from app.service import CatalogService, SearchService
+from app.service import CatalogService, CollectionService, SearchService
 
 from ..auth import InitDataUser
-from ..dependencies import DatabaseSession, Pagination
+from ..dependencies import DatabaseSession, DatabaseTransaction, Pagination
 from ..util import build_responses
 
 catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
@@ -21,8 +21,11 @@ catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
     responses=build_responses(ProductNotFoundException),
     summary="Get product by id",
 )
-async def get_product(product_id: UUID, session: DatabaseSession) -> ...:
-    return await CatalogService.get_by_id(session, product_id)
+async def get_product(product_id: UUID, user: InitDataUser, session: DatabaseTransaction) -> ...:
+    product = await CatalogService.get_by_id(session, product_id)
+    await CollectionService.fill_inclusion(session, [product], user.id)
+
+    return product
 
 
 @catalog_router.post(
@@ -33,10 +36,10 @@ async def get_product(product_id: UUID, session: DatabaseSession) -> ...:
     summary="Search products",
 )
 async def search_catalog(
-    user: InitDataUser,
     query: SearchQuery,
     pagination: Pagination,
-    session: DatabaseSession,
+    user: InitDataUser,
+    session: DatabaseTransaction,
 ) -> ...:
     product_ids = await SearchService.search_products(
         user_id=user.id,
@@ -50,8 +53,10 @@ async def search_catalog(
         limit=pagination.limit,
         offset=pagination.offset,
     )
+    products = await CatalogService.get_by_ids(session, product_ids)
+    await CollectionService.fill_inclusion(session, products, user.id)
 
-    return await CatalogService.get_by_ids(session, product_ids)
+    return products
 
 
 @catalog_router.post(

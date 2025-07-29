@@ -11,7 +11,7 @@ from .config import AuthConfig
 async def validate_api_key(
     api_key: Annotated[str | None, Depends(AuthConfig.api_key_scheme)],
 ) -> None:
-    if not api_key:
+    if api_key is None:
         raise ApiKeyUnauthorizedException
 
     if api_key != DEV_API_KEY:
