@@ -32,33 +32,6 @@ class CollectionService:
     _DEFAULT_CACHE_MAX_SIZE = 2048
 
     @staticmethod
-    async def _get_default_collection_id(session: AsyncSession, user_id: int) -> UUID:
-        if user_id in CollectionService._default_collection_cache:
-            return CollectionService._default_collection_cache[user_id]
-
-        statement = (
-            select(Collection.id)
-            .where(Collection.owner_id == user_id)
-            .order_by(Collection.created_at.asc())
-            .limit(1)
-        )
-        result = (await session.exec(statement)).one_or_none()
-
-        if result is None:
-            raise CollectionNotFoundException
-
-        if (
-            len(CollectionService._default_collection_cache)
-            >= CollectionService._DEFAULT_CACHE_MAX_SIZE
-        ):
-            CollectionService._default_collection_cache.pop(
-                next(iter(CollectionService._default_collection_cache))
-            )
-
-        CollectionService._default_collection_cache[user_id] = result
-        return result
-
-    @staticmethod
     @logfire.instrument(record_return=True)
     async def create(
         session: AsyncSession, owner_id: int, collection_create: CollectionCreate
@@ -271,4 +244,33 @@ class CollectionService:
         product_ids_in_collection = set((await session.exec(statement)).all())
 
         for product in products:
-            product.is_contained_in_user_collections = product.id in product_ids_in_collection
+            product.is_contained_in_user_collections = (
+                product.id in product_ids_in_collection
+            )
+
+    @staticmethod
+    async def _get_default_collection_id(session: AsyncSession, user_id: int) -> UUID:
+        if user_id in CollectionService._default_collection_cache:
+            return CollectionService._default_collection_cache[user_id]
+
+        statement = (
+            select(Collection.id)
+            .where(Collection.owner_id == user_id)
+            .order_by(Collection.created_at.asc())
+            .limit(1)
+        )
+        result = (await session.exec(statement)).one_or_none()
+
+        if result is None:
+            raise CollectionNotFoundException
+
+        if (
+            len(CollectionService._default_collection_cache)
+            >= CollectionService._DEFAULT_CACHE_MAX_SIZE
+        ):
+            CollectionService._default_collection_cache.pop(
+                next(iter(CollectionService._default_collection_cache))
+            )
+
+        CollectionService._default_collection_cache[user_id] = result
+        return result

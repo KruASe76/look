@@ -1,6 +1,5 @@
 from uuid import UUID
 
-import logfire
 from fastapi import APIRouter, status
 
 from app.api.schema import SearchQuery, SearchSuggestionQuery

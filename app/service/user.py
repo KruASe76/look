@@ -39,10 +39,7 @@ class UserService:
 
             if user_optional is not None:
                 if check_update_needed(user_create, user_optional):
-                    user_optional.sqlmodel_update(
-                        user_create.model_dump(exclude_unset=True)
-                    )
-                    user_optional.preferences = user_create.preferences
+                    UserService._smart_update_user(user_optional, user_create)
 
                     session.add(user_optional)
                     await session.flush()
@@ -50,7 +47,6 @@ class UserService:
                 return user_optional
 
         new_user = User.model_validate(user_create)
-        new_user.preferences = user_create.preferences
 
         session.add(new_user)
         await session.flush()
@@ -126,8 +122,7 @@ class UserService:
     @logfire.instrument(record_return=True)
     async def patch(session: AsyncSession, user: User, user_patch: UserPatch) -> User:
         if check_update_needed(user_patch, user):
-            user.sqlmodel_update(user_patch.model_dump(exclude_unset=True))
-            user.preferences = user_patch.preferences
+            UserService._smart_update_user(user, user_patch)
 
             session.add(user)
             await session.flush()
@@ -140,3 +135,16 @@ class UserService:
         statement = delete(User).where(User.id == user_id)
 
         await session.exec(statement)
+
+    @staticmethod
+    def _smart_update_user(user: User, source: UserCreate | UserPatch) -> None:
+        update_data = source.model_dump(exclude_unset=True)
+        create_preferences = update_data.pop("preferences", {})
+
+        if update_data:
+            user.sqlmodel_update(update_data)
+
+        if create_preferences:
+            new_preferences = user.preferences.copy()
+            new_preferences.update(create_preferences)
+            user.preferences = new_preferences
