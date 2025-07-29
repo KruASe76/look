@@ -88,6 +88,11 @@ class SearchService:
         if filters:
             search = search.filter(Bool(filter=filters))
 
+        if not query and not filters:
+            search = search.query(
+                FunctionScore(query=MatchAll(), functions=[RandomScore()])
+            )
+
         search = search[offset : offset + limit]
 
         response = await search.execute()
