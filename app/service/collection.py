@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from typing import ClassVar, TypeVar
+from typing import ClassVar
 from uuid import UUID
 
 import logfire
@@ -102,7 +102,9 @@ class CollectionService:
             for product in collection.products:
                 product.is_contained_in_user_collections = True
         else:
-            await CollectionService.fill_inclusion(session, collection.products, user_id)
+            await CollectionService.fill_inclusion(
+                session, collection.products, user_id
+            )
 
         return collection
 

@@ -30,7 +30,9 @@ collection_router = APIRouter(prefix="", tags=["collection"])
     summary="Create a collection",
 )
 async def create_collection(
-    collection_create: CollectionCreate, user: InitDataUser, session: DatabaseTransaction
+    collection_create: CollectionCreate,
+    user: InitDataUser,
+    session: DatabaseTransaction,
 ) -> ...:
     return await CollectionService.create(session, user.id, collection_create)
 
@@ -42,7 +44,9 @@ async def create_collection(
     responses=build_responses(CollectionNotFoundException, include_auth=True),
     summary="Get collection by id",
 )
-async def get_collection(collection_id: UUID, user: InitDataUser, session: DatabaseTransaction) -> ...:
+async def get_collection(
+    collection_id: UUID, user: InitDataUser, session: DatabaseTransaction
+) -> ...:
     return await CollectionService.get_by_id(session, user.id, collection_id)
 
 

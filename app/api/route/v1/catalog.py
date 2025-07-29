@@ -21,7 +21,9 @@ catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
     responses=build_responses(ProductNotFoundException),
     summary="Get product by id",
 )
-async def get_product(product_id: UUID, user: InitDataUser, session: DatabaseTransaction) -> ...:
+async def get_product(
+    product_id: UUID, user: InitDataUser, session: DatabaseTransaction
+) -> ...:
     product = await CatalogService.get_by_id(session, product_id)
     await CollectionService.fill_inclusion(session, [product], user.id)
 
