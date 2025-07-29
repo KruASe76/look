@@ -32,7 +32,7 @@ collection_router = APIRouter(prefix="", tags=["collection"])
 async def create_collection(
     collection_create: CollectionCreate, user: InitDataUser, session: DatabaseSession
 ) -> ...:
-    return await CollectionService.create(session, user, collection_create)
+    return await CollectionService.create(session, user.id, collection_create)
 
 
 @collection_router.get(
