@@ -1,5 +1,6 @@
 from uuid import UUID
 
+import logfire
 from fastapi import APIRouter, status
 
 from app.api.schema import SearchQuery, SearchSuggestionQuery
@@ -58,6 +59,7 @@ async def search_catalog(
     products = await CatalogService.get_by_ids(session, product_ids)
     await CollectionService.fill_inclusion(session, products, user.id)
 
+    logfire.info("why", product_ids=product_ids, products=products)
     return products
 
 

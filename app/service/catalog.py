@@ -28,6 +28,9 @@ class CatalogService:
     async def get_by_ids(
         session: AsyncSession, product_ids: Sequence[UUID]
     ) -> list[Product]:
+        if not product_ids:
+            return []
+
         statement = select(Product).where(Product.id.in_(product_ids))
 
         return (await session.exec(statement)).all()
