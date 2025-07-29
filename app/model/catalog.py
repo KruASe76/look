@@ -59,7 +59,7 @@ class Product(_ProductBase, table=True):
     __tablename__ = "product"
 
     # non-db fields
-    _is_contained_in_user_collections: bool = PrivateAttr(default=False)
+    _is_contained_in_user_collections: bool = PrivateAttr()
 
     @property
     def is_contained_in_user_collections(self) -> bool:
@@ -71,7 +71,7 @@ class Product(_ProductBase, table=True):
 
 
 class _ProductSchemaExtra(SQLModel):
-    is_contained_in_user_collections: bool = False
+    is_contained_in_user_collections: bool
 
 
 class BriefProductSchema(_ProductSchemaExtra, _BriefProductBase):

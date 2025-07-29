@@ -271,5 +271,4 @@ class CollectionService:
         product_ids_in_collection = set((await session.exec(statement)).all())
 
         for product in products:
-            if product.id in product_ids_in_collection:
-                product.is_contained_in_user_collections = True
+            product.is_contained_in_user_collections = product.id in product_ids_in_collection
