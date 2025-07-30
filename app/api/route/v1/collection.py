@@ -141,6 +141,6 @@ async def update_product_in_collections(
     user: InitDataUserWithCollectionIds,
     session: DatabaseTransaction,
 ) -> None:
-    await CollectionService.update_collection_inclusion(
+    await CollectionService.update_product_inclusion(
         session, user, product_id, collection_ids
     )

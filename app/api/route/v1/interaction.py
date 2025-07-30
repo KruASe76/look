@@ -5,10 +5,10 @@ from fastapi import APIRouter, Body, status
 
 from app.core.exceptions import ProductNotFoundException
 from app.model import InteractionType
-from app.service import InteractionService
+from app.service import CollectionService, InteractionService
 
-from ..auth import InitDataUser
-from ..dependencies import DatabaseSession
+from ..auth import InitDataUserWithCollectionIds
+from ..dependencies import DatabaseTransaction
 from ..util import build_responses
 
 interaction_router = APIRouter(prefix="/interaction", tags=["interaction"])
@@ -24,9 +24,17 @@ interaction_router = APIRouter(prefix="/interaction", tags=["interaction"])
 async def record_product_interaction(
     product_id: UUID,
     interaction_type: Annotated[InteractionType, Body(embed=True)],
-    user: InitDataUser,
-    session: DatabaseSession,
+    user: InitDataUserWithCollectionIds,
+    session: DatabaseTransaction,
 ) -> None:
     await InteractionService.record_product_interaction(
         session, user.id, product_id, interaction_type
     )
+
+    # syncing user's default collection
+    if interaction_type == InteractionType.LIKE:
+        await CollectionService.add_products(session, user, [], [product_id])
+    else:
+        # if the product is included only to the default collection, remove it from there
+        if len(await CollectionService.check_product_inclusion(session, user, product_id)) == 1:
+            await CollectionService.delete_products(session, user, [], [product_id])

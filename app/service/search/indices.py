@@ -51,7 +51,7 @@ class Product(AsyncDocument):
             brand=product.brand,
             category=product.category,
             color_name=product.color_name,
-            sizes=product.sizes,
+            sizes=[size.split("/")[0] for size in product.sizes],
             description=product.description,
             price=product.discount_price,
         )

@@ -32,7 +32,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend.rule=Host(`${API_HOST}`)
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend.entryPoints=websecure
     depends_on:
       postgres:
         condition: service_healthy

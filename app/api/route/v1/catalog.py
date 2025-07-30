@@ -25,7 +25,7 @@ async def get_product(
     product_id: UUID, user: InitDataUser, session: DatabaseTransaction
 ) -> ...:
     product = await CatalogService.get_by_id(session, product_id)
-    await CollectionService.fill_inclusion(session, [product], user.id)
+    await CollectionService.fill_product_inclusion(session, [product], user.id)
 
     return product
 
@@ -56,7 +56,7 @@ async def search_catalog(
         offset=pagination.offset,
     )
     products = await CatalogService.get_by_ids(session, product_ids)
-    await CollectionService.fill_inclusion(session, products, user.id)
+    await CollectionService.fill_product_inclusion(session, products, user.id)
 
     return products
 

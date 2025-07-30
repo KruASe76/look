@@ -75,7 +75,7 @@ class CollectionService:
             for product in collection.products:
                 product.is_contained_in_user_collections = True
         else:
-            await CollectionService.fill_inclusion(
+            await CollectionService.fill_product_inclusion(
                 session, collection.products, user_id
             )
 
@@ -141,6 +141,9 @@ class CollectionService:
         collection_ids: list[UUID],
         product_ids: list[UUID],
     ) -> None:
+        if not collection_ids:
+            collection_ids = [CollectionService._get_default_collection_id(session, user.id)]
+
         if set(collection_ids) - user.collection_ids:
             raise CollectionForbiddenException
 
@@ -169,6 +172,9 @@ class CollectionService:
         collection_ids: list[UUID],
         product_ids: list[UUID],
     ) -> None:
+        if not collection_ids:
+            collection_ids = [CollectionService._get_default_collection_id(session, user.id)]
+
         if set(collection_ids) - user.collection_ids:
             raise CollectionForbiddenException
 
@@ -197,7 +203,7 @@ class CollectionService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def update_collection_inclusion(
+    async def update_product_inclusion(
         session: AsyncSession,
         user: AuthenticatedUserWithCollectionIds,
         product_id: UUID,
@@ -227,7 +233,7 @@ class CollectionService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def fill_inclusion(
+    async def fill_product_inclusion(
         session: AsyncSession, products: list[Product], user_id: int
     ) -> None:
         if not products:
