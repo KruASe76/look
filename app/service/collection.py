@@ -76,7 +76,7 @@ class CollectionService:
                 product.is_contained_in_user_collections = True
         else:
             await CollectionService.fill_product_inclusion(
-                session, collection.products, user_id
+                session=session, products=collection.products, user_id=user_id
             )
 
         return collection
@@ -109,7 +109,10 @@ class CollectionService:
             raise CollectionForbiddenException
 
         collection = await CollectionService.get_by_id(
-            session, collection_id, select_products=False, select_owner=False
+            session=session,
+            collection_id=collection_id,
+            select_products=False,
+            select_owner=False,
         )
 
         if check_update_needed(collection_patch, collection):
@@ -142,7 +145,11 @@ class CollectionService:
         product_ids: list[UUID],
     ) -> None:
         if not collection_ids:
-            collection_ids = [CollectionService._get_default_collection_id(session, user.id)]
+            collection_ids = [
+                CollectionService._get_default_collection_id(
+                    session=session, user_id=user.id
+                )
+            ]
 
         if set(collection_ids) - user.collection_ids:
             raise CollectionForbiddenException
@@ -173,7 +180,11 @@ class CollectionService:
         product_ids: list[UUID],
     ) -> None:
         if not collection_ids:
-            collection_ids = [CollectionService._get_default_collection_id(session, user.id)]
+            collection_ids = [
+                CollectionService._get_default_collection_id(
+                    session=session, user_id=user.id
+                )
+            ]
 
         if set(collection_ids) - user.collection_ids:
             raise CollectionForbiddenException
@@ -213,7 +224,7 @@ class CollectionService:
             raise CollectionForbiddenException
 
         current_collection_ids = await CollectionService.check_product_inclusion(
-            session, product_id, user
+            session=session, user=user, product_id=product_id
         )
 
         collections_to_add = list(set(new_collection_ids) - set(current_collection_ids))
@@ -223,12 +234,18 @@ class CollectionService:
 
         if collections_to_add:
             await CollectionService.add_products(
-                session, user, collections_to_add, [product_id]
+                session=session,
+                user=user,
+                collection_ids=collections_to_add,
+                product_ids=[product_id],
             )
 
         if collections_to_remove:
             await CollectionService.delete_products(
-                session, user, collections_to_remove, [product_id]
+                session=session,
+                user=user,
+                collection_ids=collections_to_remove,
+                product_ids=[product_id],
             )
 
     @staticmethod
@@ -240,7 +257,7 @@ class CollectionService:
             return
 
         default_collection_id = await CollectionService._get_default_collection_id(
-            session, user_id
+            session=session, user_id=user_id
         )
 
         statement = select(CollectionProductLink.product_id).where(

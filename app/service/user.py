@@ -39,7 +39,9 @@ class UserService:
 
             if user_optional is not None:
                 if check_update_needed(user_create, user_optional):
-                    UserService._smart_update_user(user_optional, user_create)
+                    UserService._smart_update_user(
+                        user=user_optional, source=user_create
+                    )
 
                     session.add(user_optional)
                     await session.flush()
@@ -54,7 +56,7 @@ class UserService:
 
         # also creating default collection
         await CollectionService.create(
-            session,
+            session=session,
             owner_id=new_user.id,
             collection_create=CollectionCreate(
                 name=Defaults.collection_name,
@@ -122,7 +124,7 @@ class UserService:
     @logfire.instrument(record_return=True)
     async def patch(session: AsyncSession, user: User, user_patch: UserPatch) -> User:
         if check_update_needed(user_patch, user):
-            UserService._smart_update_user(user, user_patch)
+            UserService._smart_update_user(user=user, source=user_patch)
 
             session.add(user)
             await session.flush()

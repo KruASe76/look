@@ -20,4 +20,4 @@ async def warmup() -> None:
     from app.database import spawn_session
 
     async with asynccontextmanager(spawn_session)() as session:
-        await SearchService.refresh_meta_cache(session)
+        await SearchService.refresh_meta_cache(session=session)

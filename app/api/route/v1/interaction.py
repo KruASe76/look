@@ -28,13 +28,27 @@ async def record_product_interaction(
     session: DatabaseTransaction,
 ) -> None:
     await InteractionService.record_product_interaction(
-        session, user.id, product_id, interaction_type
+        session=session,
+        user_id=user.id,
+        product_id=product_id,
+        interaction_type=interaction_type,
     )
 
     # syncing user's default collection
     if interaction_type == InteractionType.LIKE:
-        await CollectionService.add_products(session, user, [], [product_id])
+        await CollectionService.add_products(
+            session=session, user=user, collection_ids=[], product_ids=[product_id]
+        )
     else:
         # if the product is included only to the default collection, remove it from there
-        if len(await CollectionService.check_product_inclusion(session, user, product_id)) == 1:
-            await CollectionService.delete_products(session, user, [], [product_id])
+        if (
+            len(
+                await CollectionService.check_product_inclusion(
+                    session=session, user=user, product_id=product_id
+                )
+            )
+            == 1
+        ):
+            await CollectionService.delete_products(
+                session=session, user=user, collection_ids=[], product_ids=[product_id]
+            )

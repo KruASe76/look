@@ -48,8 +48,8 @@ ValidInitData = Annotated[InitData, Depends(validate_init_data)]
 
 async def get_full_user(init_data: ValidInitData, session: DatabaseTransaction) -> User:
     return await UserService.get_or_upsert(
-        session,
-        UserCreate(
+        session=session,
+        user_create=UserCreate(
             telegram_id=init_data.user.id,
             username=init_data.user.username,
             first_name=init_data.user.first_name,
@@ -62,7 +62,9 @@ async def get_full_user(init_data: ValidInitData, session: DatabaseTransaction) 
 async def get_authenticated_user(
     init_data: ValidInitData, session: DatabaseTransaction
 ) -> AuthenticatedUser:
-    user = await UserService.get_authenticated(session, init_data.user.id)
+    user = await UserService.get_authenticated(
+        session=session, telegram_id=init_data.user.id
+    )
 
     if user is None:
         raise InitDataUnauthorizedException
@@ -74,7 +76,7 @@ async def get_authenticated_user_with_collection_ids(
     init_data: ValidInitData, session: DatabaseTransaction
 ) -> AuthenticatedUserWithCollectionIds:
     user = await UserService.get_authenticated_with_collection_ids(
-        session, init_data.user.id
+        session=session, telegram_id=init_data.user.id
     )
 
     if user is None:

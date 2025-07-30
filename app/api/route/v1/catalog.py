@@ -24,8 +24,10 @@ catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
 async def get_product(
     product_id: UUID, user: InitDataUser, session: DatabaseTransaction
 ) -> ...:
-    product = await CatalogService.get_by_id(session, product_id)
-    await CollectionService.fill_product_inclusion(session, [product], user.id)
+    product = await CatalogService.get_by_id(session=session, product_id=product_id)
+    await CollectionService.fill_product_inclusion(
+        session=session, products=[product], user_id=user.id
+    )
 
     return product
 
@@ -55,8 +57,10 @@ async def search_catalog(
         limit=pagination.limit,
         offset=pagination.offset,
     )
-    products = await CatalogService.get_by_ids(session, product_ids)
-    await CollectionService.fill_product_inclusion(session, products, user.id)
+    products = await CatalogService.get_by_ids(session=session, product_ids=product_ids)
+    await CollectionService.fill_product_inclusion(
+        session=session, products=products, user_id=user.id
+    )
 
     return products
 
@@ -68,7 +72,7 @@ async def search_catalog(
     summary="Get search suggestions",
 )
 async def search_suggestions(query: SearchSuggestionQuery) -> ...:
-    return await SearchService.get_suggestions(query.query, query.limit)
+    return await SearchService.get_suggestions(query=query.query, limit=query.limit)
 
 
 @catalog_router.get(
@@ -78,4 +82,4 @@ async def search_suggestions(query: SearchSuggestionQuery) -> ...:
     summary="Get search metadata",
 )
 async def get_search_meta(session: DatabaseSession) -> ...:
-    return await SearchService.get_meta(session)
+    return await SearchService.get_meta(session=session)

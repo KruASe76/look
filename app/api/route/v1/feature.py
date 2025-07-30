@@ -20,7 +20,7 @@ feature_router = APIRouter(prefix="/feature", tags=["feature"])
 )
 async def get_global_trends(session: DatabaseSession) -> ...:
     return await CollectionService.get_by_owner_id(
-        session, SpecialUserIds.GLOBAL_TRENDS
+        session=session, owner_id=SpecialUserIds.GLOBAL_TRENDS
     )
 
 
@@ -32,7 +32,7 @@ async def get_global_trends(session: DatabaseSession) -> ...:
 )
 async def get_global_brands(session: DatabaseSession) -> ...:
     return await CollectionService.get_by_owner_id(
-        session, SpecialUserIds.GLOBAL_BRANDS
+        session=session, owner_id=SpecialUserIds.GLOBAL_BRANDS
     )
 
 
@@ -44,7 +44,9 @@ async def get_global_brands(session: DatabaseSession) -> ...:
 )
 async def get_personal_trends(user: InitDataUser, session: DatabaseSession) -> ...:  # noqa: ARG001
     result = list(
-        await CollectionService.get_by_owner_id(session, SpecialUserIds.PERSONAL_TRENDS)
+        await CollectionService.get_by_owner_id(
+            session=session, owner_id=SpecialUserIds.PERSONAL_TRENDS
+        )
     )
 
     random.shuffle(result)
@@ -60,7 +62,9 @@ async def get_personal_trends(user: InitDataUser, session: DatabaseSession) -> .
 )
 async def get_personal_brands(user: InitDataUser, session: DatabaseSession) -> ...:  # noqa: ARG001
     result = list(
-        await CollectionService.get_by_owner_id(session, SpecialUserIds.PERSONAL_BRANDS)
+        await CollectionService.get_by_owner_id(
+            session=session, owner_id=SpecialUserIds.PERSONAL_BRANDS
+        )
     )
 
     random.shuffle(result)

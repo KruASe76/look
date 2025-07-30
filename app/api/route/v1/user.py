@@ -21,7 +21,7 @@ user_router = APIRouter(prefix="/user", tags=["user"])
     summary="Get user by id",
 )
 async def get_user(user_id: int, session: DatabaseTransaction) -> ...:
-    return await UserService.get_by_id(session, user_id)
+    return await UserService.get_by_id(session=session, user_id=user_id)
 
 
 @user_router.patch(
@@ -36,7 +36,7 @@ async def patch_user(
     user: InitDataUserFull,
     session: DatabaseTransaction,
 ) -> ...:
-    return await UserService.patch(session, user, user_patch)
+    return await UserService.patch(session=session, user=user, user_patch=user_patch)
 
 
 @user_router.delete(
@@ -47,4 +47,4 @@ async def patch_user(
     summary="Delete user",
 )
 async def delete_user(user: InitDataUser, session: DatabaseTransaction) -> ...:
-    await UserService.delete_by_id(session, user.id)
+    await UserService.delete_by_id(session=session, user_id=user.id)

@@ -25,7 +25,7 @@ dev_responses = build_responses(include_dev_auth=True)
 async def sync_search(
     since: Annotated[datetime, Body(embed=True)], session: DatabaseSession
 ) -> ...:
-    return await SearchService.sync_products(session, since)
+    return await SearchService.sync_products(session=session, since=since)
 
 
 @dev_router.post(
@@ -36,4 +36,4 @@ async def sync_search(
     summary="Refresh search metadata cache, return fresh metadata",
 )
 async def refresh_search_meta(session: DatabaseSession) -> ...:
-    return await SearchService.refresh_meta_cache(session)
+    return await SearchService.refresh_meta_cache(session=session)
