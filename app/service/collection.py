@@ -71,13 +71,14 @@ class CollectionService:
         except InvalidRequestError as e:
             raise CollectionNotFoundException from e
 
-        if collection.owner_id == user_id:
-            for product in collection.products:
-                product.is_contained_in_user_collections = True
-        else:
-            await CollectionService.fill_product_inclusion(
-                session=session, products=collection.products, user_id=user_id
-            )
+        if select_products:
+            if collection.owner_id == user_id:
+                for product in collection.products:
+                    product.is_contained_in_user_collections = True
+            else:
+                await CollectionService.fill_product_inclusion(
+                    session=session, products=collection.products, user_id=user_id
+                )
 
         return collection
 
@@ -110,6 +111,7 @@ class CollectionService:
 
         collection = await CollectionService.get_by_id(
             session=session,
+            user_id=user.id,
             collection_id=collection_id,
             select_products=False,
             select_owner=False,
