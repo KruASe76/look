@@ -82,6 +82,7 @@ class _BriefProductBase(SQLModel):
 
 # noinspection PyTypeChecker
 class _ProductBase(_BriefProductBase):
+    original_url: str = Field(nullable=False)
     description: str = Field(max_length=4096, sa_type=String(4096), nullable=False)
     details: ProductDetails = Field(sa_type=JSONB, nullable=False)
 
