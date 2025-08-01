@@ -27,6 +27,13 @@ class CollectionProductLink(SQLModel, table=True):
         sa_type=PG_UUID(as_uuid=True),
     )
 
+    created_at: datetime | None = Field(
+        sa_column=Column(
+            DateTime(timezone=True), server_default=func.now(), nullable=False
+        ),
+        default=None,
+    )
+
 
 # noinspection PyTypeChecker
 class _CollectionBase(SQLModel):
@@ -57,7 +64,12 @@ class Collection(_CollectionBase, _CollectionIdsModel, table=True):
     )
 
     owner: "User" = Relationship(back_populates="collections")
-    products: list["Product"] = Relationship(link_model=CollectionProductLink)
+    products: list["Product"] = Relationship(
+        link_model=CollectionProductLink,
+        sa_relationship_kwargs={
+            "order_by": "CollectionProductLink.created_at.desc()",
+        }
+    )
 
 
 class CollectionCreate(_CollectionBase):
