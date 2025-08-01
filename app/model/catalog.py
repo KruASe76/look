@@ -8,8 +8,6 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import relationship as sa_relationship
 from sqlmodel import Field, Relationship, SQLModel
 
-from .misc import ProductDetails
-
 
 # noinspection PyTypeChecker
 class ProductColorGroup(SQLModel, table=True):
@@ -84,7 +82,7 @@ class _BriefProductBase(SQLModel):
 class _ProductBase(_BriefProductBase):
     original_url: str = Field(nullable=False)
     description: str = Field(max_length=4096, sa_type=String(4096), nullable=False)
-    details: ProductDetails = Field(sa_type=JSONB, nullable=False)
+    details: dict[str, str] = Field(sa_type=JSONB, nullable=False)
 
 
 class Product(_ProductBase, table=True):
