@@ -148,7 +148,7 @@ class CollectionService:
     ) -> None:
         if not collection_ids:
             collection_ids = [
-                CollectionService._get_default_collection_id(
+                await CollectionService._get_default_collection_id(
                     session=session, user_id=user.id
                 )
             ]
@@ -183,7 +183,7 @@ class CollectionService:
     ) -> None:
         if not collection_ids:
             collection_ids = [
-                CollectionService._get_default_collection_id(
+                await CollectionService._get_default_collection_id(
                     session=session, user_id=user.id
                 )
             ]
