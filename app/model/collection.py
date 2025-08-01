@@ -10,14 +10,21 @@ if TYPE_CHECKING:
     from . import BriefProductSchema, BriefUserSchema, Product, User
 
 
+# noinspection PyTypeChecker
 class CollectionProductLink(SQLModel, table=True):
     __tablename__ = "collection_product_link"
 
     collection_id: UUID = Field(
-        foreign_key="collection.id", ondelete="CASCADE", primary_key=True
+        foreign_key="collection.id",
+        ondelete="CASCADE",
+        primary_key=True,
+        sa_type=PG_UUID(as_uuid=True),
     )
     product_id: UUID = Field(
-        foreign_key="product.id", ondelete="CASCADE", primary_key=True
+        foreign_key="product.id",
+        ondelete="CASCADE",
+        primary_key=True,
+        sa_type=PG_UUID(as_uuid=True),
     )
 
 

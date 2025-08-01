@@ -3,9 +3,38 @@ from uuid import UUID
 
 from pydantic import PrivateAttr
 from sqlalchemy import Column, DateTime, String, func, text
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlmodel import Field, SQLModel
+from sqlalchemy.orm import relationship as sa_relationship
+from sqlmodel import Field, Relationship, SQLModel
+
+from .misc import ProductDetails
+
+
+# noinspection PyTypeChecker
+class ProductColorGroup(SQLModel, table=True):
+    __tablename__ = "product_color_group"
+
+    product_id: UUID = Field(
+        foreign_key="product.id",
+        ondelete="CASCADE",
+        primary_key=True,
+        sa_type=PG_UUID(as_uuid=True),
+    )
+    color_group_id: UUID = Field(
+        nullable=False, index=True, sa_type=PG_UUID(as_uuid=True)
+    )
+
+    color_code: str = Field(
+        min_length=7, max_length=7, sa_type=String(7), nullable=False
+    )
+    color_name: str = Field(max_length=50, sa_type=String(50), nullable=False)
+
+
+class ProductColorGroupSchema(SQLModel):
+    product_id: UUID
+    color_code: str
+    color_name: str
 
 
 # noinspection PyTypeChecker
@@ -21,17 +50,18 @@ class _BriefProductBase(SQLModel):
 
     name: str = Field(max_length=255, sa_type=String(255), nullable=False)
     brand: str = Field(max_length=255, sa_type=String(255), nullable=False)
-
     category: str = Field(max_length=50, sa_type=String(50), nullable=False)
+
     color_code: str = Field(
         min_length=7, max_length=7, sa_type=String(7), nullable=False
     )
     color_name: str = Field(max_length=50, sa_type=String(50), nullable=False)
+    color_group_id: UUID = Field(nullable=False, sa_type=PG_UUID(as_uuid=True))
+
     sizes: list[str] = Field(
         sa_column=Column(ARRAY(String), server_default="{}", nullable=False),
         default_factory=list,
     )
-
     image_urls: list[str] = Field(
         sa_column=Column(ARRAY(String), server_default="{}", nullable=False),
         default_factory=list,
@@ -53,10 +83,20 @@ class _BriefProductBase(SQLModel):
 # noinspection PyTypeChecker
 class _ProductBase(_BriefProductBase):
     description: str = Field(max_length=4096, sa_type=String(4096), nullable=False)
+    details: ProductDetails = Field(sa_type=JSONB, nullable=False)
 
 
 class Product(_ProductBase, table=True):
     __tablename__ = "product"
+
+    color_group: list[ProductColorGroup] = Relationship(
+        sa_relationship=sa_relationship(
+            "ProductColorGroup",
+            primaryjoin="Product.color_group_id == foreign(ProductColorGroup.color_group_id)",
+            order_by="ProductColorGroup.color_name",
+            viewonly=True,
+        )
+    )
 
     # non-db fields
     _is_contained_in_user_collections: bool = PrivateAttr()
@@ -71,6 +111,8 @@ class Product(_ProductBase, table=True):
 
 
 class _ProductSchemaExtra(SQLModel):
+    color_group_id: UUID = Field(exclude=True)
+
     is_contained_in_user_collections: bool
 
 
@@ -79,4 +121,4 @@ class BriefProductSchema(_ProductSchemaExtra, _BriefProductBase):
 
 
 class ProductSchema(_ProductSchemaExtra, _ProductBase):
-    pass
+    color_group: list[ProductColorGroupSchema] = []

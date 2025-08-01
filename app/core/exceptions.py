@@ -52,13 +52,13 @@ class NotFoundException(AppException):
     message = "Not found"
 
 
-class UserNotFoundException(ForbiddenException):
+class UserNotFoundException(NotFoundException):
     message = "User not found"
 
 
-class ProductNotFoundException(ForbiddenException):
+class ProductNotFoundException(NotFoundException):
     message = "Product not found"
 
 
-class CollectionNotFoundException(ForbiddenException):
+class CollectionNotFoundException(NotFoundException):
     message = "Collection not found"

@@ -45,21 +45,25 @@ class SearchService:
         if query:
             if is_article(query):
                 # noinspection PyTypeChecker
-                search = search.query(Match("article", query))
-            else:
-                search = search.query(
-                    MultiMatch(
-                        query=query,
-                        fields=[
-                            "name^3",
-                            "category^3",
-                            "color_name^2",
-                            "brand^2",
-                            "description^1",
-                        ],
-                        fuzziness="AUTO",
-                    )
+                article_search = search.query(Match("article", query))
+                article_response = await article_search.execute()
+
+                if len(article_response.hits) == 1:
+                    return [UUID(hit.meta.id) for hit in article_response.hits]
+
+            search = search.query(
+                MultiMatch(
+                    query=query,
+                    fields=[
+                        "name^3",
+                        "category^3",
+                        "color_name^2",
+                        "brand^2",
+                        "description^1",
+                    ],
+                    fuzziness="AUTO",
                 )
+            )
 
         filters = []
 

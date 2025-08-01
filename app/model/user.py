@@ -3,6 +3,7 @@ from uuid import UUID
 
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import Field, Relationship, SQLModel
 
 from app.core.config import Defaults
@@ -99,10 +100,14 @@ class _UserCartBase(SQLModel):
     quantity: int = Field(ge=1, default=1, nullable=False)
 
 
+# noinspection PyTypeChecker
 class _UserCartIds(SQLModel):
     user_id: int = Field(foreign_key="user.id", ondelete="CASCADE", primary_key=True)
     product_id: UUID = Field(
-        foreign_key="product.id", ondelete="CASCADE", primary_key=True
+        foreign_key="product.id",
+        ondelete="CASCADE",
+        primary_key=True,
+        sa_type=PG_UUID(as_uuid=True),
     )
 
 
