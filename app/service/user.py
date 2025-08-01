@@ -139,6 +139,7 @@ class UserService:
         await session.exec(statement)
 
     @staticmethod
+    @logfire.instrument(record_return=True)
     def _smart_update_user(user: User, source: UserCreate | UserPatch) -> None:
         update_data = source.model_dump(exclude_unset=True)
         create_preferences = update_data.pop("preferences", {})

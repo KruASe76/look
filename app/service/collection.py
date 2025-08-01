@@ -274,6 +274,7 @@ class CollectionService:
             )
 
     @staticmethod
+    @logfire.instrument(record_return=True)
     async def _get_default_collection_id(session: AsyncSession, user_id: int) -> UUID:
         if user_id in CollectionService._default_collection_cache:
             return CollectionService._default_collection_cache[user_id]
