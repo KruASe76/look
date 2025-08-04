@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
@@ -131,22 +132,33 @@ class SearchService:
 
         return [hit.name_suggest for hit in response.hits]
 
-    # noinspection Pydantic
+    # noinspection PyTypeChecker
     @classmethod
     @logfire.instrument(record_return=True)
     async def get_meta(cls, session: AsyncSession) -> SearchMeta:
         if cls.META_CACHE is None:
-            field_to_column = {
-                "categories": Product.category,
-                "colors": Product.color_name,
-                "brands": Product.brand,
-            }
+            all_brands: Sequence[str] = (
+                await session.exec(
+                    select(Product.brand).distinct().order_by(Product.brand)
+                )
+            ).all()
+            all_categories: Sequence[str] = (
+                await session.exec(
+                    select(Product.category).distinct().order_by(Product.category)
+                )
+            ).all()
+            color_dict: dict[str, str] = dict(
+                (
+                    await session.exec(
+                        select(Product.color_name, Product.color_code)
+                        .distinct(Product.color_name)  # postgres-specific
+                        .order_by(Product.color_name)
+                    )
+                ).all()
+            )
 
             cls.META_CACHE = SearchMeta(
-                **{
-                    field: sorted((await session.exec(select(column).distinct())).all())
-                    for field, column in field_to_column.items()
-                }
+                brands=all_brands, categories=all_categories, colors=color_dict
             )
 
         return cls.META_CACHE

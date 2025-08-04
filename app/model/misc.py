@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SearchMeta(BaseModel):
-    categories: list[str]
-    colors: list[str]
     brands: list[str]
+    categories: list[str]
+    colors: dict[str, str] = Field(description="Mapping of color names to their hex codes")
