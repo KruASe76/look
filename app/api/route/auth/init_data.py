@@ -32,12 +32,11 @@ async def validate_init_data(
 
     try:
         init_data = InitData.parse(auth.credentials)
+        init_data.validate(bot_token=BOT_TOKEN, raise_error=True)
     except InitDataPyError as e:
         raise InitDataForbiddenException from e
 
-    if not (
-        init_data.validate(bot_token=BOT_TOKEN, raise_error=False) and init_data.user
-    ):
+    if not init_data.user:
         raise InitDataForbiddenException
 
     return init_data
