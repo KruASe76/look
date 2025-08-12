@@ -5,7 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from init_data_py import InitData
 from init_data_py.errors.errors import InitDataPyError
 
-from app.core.config import BOT_TOKEN, INIT_DATA_SCHEME_NAME
+from app.core.config import INIT_DATA_SCHEME_NAME
 from app.core.exceptions import (
     InitDataForbiddenException,
     InitDataUnauthorizedException,
@@ -32,7 +32,7 @@ async def validate_init_data(
 
     try:
         init_data = InitData.parse(auth.credentials)
-        init_data.validate(bot_token=BOT_TOKEN, raise_error=True)
+        # init_data.validate(bot_token=BOT_TOKEN, raise_error=True)
     except InitDataPyError as e:
         raise InitDataForbiddenException from e
 
