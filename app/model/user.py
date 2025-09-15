@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
-from sqlalchemy import Column, String
+from sqlalchemy import BigInteger, Column, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import Field, Relationship, SQLModel
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 # noinspection PyTypeChecker
 class _BriefUserBase(SQLModel):
-    telegram_id: int | None = Field(unique=True)
+    telegram_id: int | None = Field(unique=True, sa_type=BigInteger)
     username: str | None = Field(max_length=64, sa_type=String(64))
     first_name: str = Field(max_length=64, sa_type=String(64), nullable=False)
     last_name: str | None = Field(max_length=64, sa_type=String(64))
