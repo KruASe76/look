@@ -22,9 +22,11 @@ from .util import check_update_needed
 
 # noinspection PyTypeChecker,Pydantic
 class UserService:
-    @staticmethod
+    @classmethod
     @logfire.instrument(record_return=True)
-    async def get_or_upsert(session: AsyncSession, user_create: UserCreate) -> User:
+    async def get_or_upsert(
+        cls, session: AsyncSession, user_create: UserCreate
+    ) -> User:
         if user_create.telegram_id is not None:
             statement = (
                 select(User)
@@ -39,9 +41,7 @@ class UserService:
 
             if user_optional is not None:
                 if check_update_needed(user_create, user_optional):
-                    UserService._smart_update_user(
-                        user=user_optional, source=user_create
-                    )
+                    cls._smart_update_user(user=user_optional, source=user_create)
 
                     session.add(user_optional)
                     await session.flush()
@@ -120,11 +120,13 @@ class UserService:
             collection_ids={collection.id for collection in user_optional.collections},
         )
 
-    @staticmethod
+    @classmethod
     @logfire.instrument(record_return=True)
-    async def patch(session: AsyncSession, user: User, user_patch: UserPatch) -> User:
+    async def patch(
+        cls, session: AsyncSession, user: User, user_patch: UserPatch
+    ) -> User:
         if check_update_needed(user_patch, user):
-            UserService._smart_update_user(user=user, source=user_patch)
+            cls._smart_update_user(user=user, source=user_patch)
 
             session.add(user)
             await session.flush()
@@ -133,7 +135,7 @@ class UserService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def delete_by_id(session: AsyncSession, user_id: int) -> None:
+    async def delete(session: AsyncSession, user_id: int) -> None:
         statement = delete(User).where(User.id == user_id)
 
         await session.exec(statement)
@@ -141,6 +143,9 @@ class UserService:
     @staticmethod
     @logfire.instrument(record_return=True)
     def _smart_update_user(user: User, source: UserCreate | UserPatch) -> None:
+        """
+        Update user fields from source, merging preferences if present
+        """
         update_data = source.model_dump(exclude_unset=True)
         create_preferences = update_data.pop("preferences", {})
 

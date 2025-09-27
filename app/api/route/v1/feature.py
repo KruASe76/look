@@ -19,7 +19,7 @@ feature_router = APIRouter(prefix="/feature", tags=["feature"])
     summary="Get trends collections",
 )
 async def get_global_trends(session: DatabaseSession) -> ...:
-    return await CollectionService.get_by_owner_id(
+    return await CollectionService.get_all_by_owner_id(
         session=session, owner_id=SpecialUserIds.GLOBAL_TRENDS
     )
 
@@ -31,7 +31,7 @@ async def get_global_trends(session: DatabaseSession) -> ...:
     summary="Get brands collections",
 )
 async def get_global_brands(session: DatabaseSession) -> ...:
-    return await CollectionService.get_by_owner_id(
+    return await CollectionService.get_all_by_owner_id(
         session=session, owner_id=SpecialUserIds.GLOBAL_BRANDS
     )
 
@@ -44,7 +44,7 @@ async def get_global_brands(session: DatabaseSession) -> ...:
 )
 async def get_personal_trends(user: InitDataUser, session: DatabaseSession) -> ...:  # noqa: ARG001
     result = list(
-        await CollectionService.get_by_owner_id(
+        await CollectionService.get_all_by_owner_id(
             session=session, owner_id=SpecialUserIds.PERSONAL_TRENDS
         )
     )
@@ -62,7 +62,7 @@ async def get_personal_trends(user: InitDataUser, session: DatabaseSession) -> .
 )
 async def get_personal_brands(user: InitDataUser, session: DatabaseSession) -> ...:  # noqa: ARG001
     result = list(
-        await CollectionService.get_by_owner_id(
+        await CollectionService.get_all_by_owner_id(
             session=session, owner_id=SpecialUserIds.PERSONAL_BRANDS
         )
     )

@@ -47,4 +47,4 @@ async def patch_user(
     summary="Delete user",
 )
 async def delete_user(user: InitDataUser, session: DatabaseTransaction) -> ...:
-    await UserService.delete_by_id(session=session, user_id=user.id)
+    await UserService.delete(session=session, user_id=user.id)

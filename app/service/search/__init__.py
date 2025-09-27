@@ -30,7 +30,7 @@ class SearchService:
     @staticmethod
     @logfire.instrument(record_return=True)
     async def search_products(
-        user_id: int,  # noqa: ARG004
+        user_id: int,  # noqa: ARG003
         query: str | None,
         categories: list[str] | None,
         colors: list[str] | None,
@@ -132,7 +132,7 @@ class SearchService:
 
         return [hit.name_suggest for hit in response.hits]
 
-    # noinspection PyTypeChecker
+    # noinspection PyTypeChecker,Pydantic
     @classmethod
     @logfire.instrument(record_return=True)
     async def get_meta(cls, session: AsyncSession) -> SearchMeta:
@@ -174,9 +174,10 @@ class SearchService:
     @logfire.instrument(record_return=True)
     async def sync_products(session: AsyncSession, since: datetime) -> int:
         """
+        Sync product index with database
+
         :return: number of products synced
         """
-
         statement = select(Product).where(Product.updated_at >= since)
         products = (await session.exec(statement)).all()
 

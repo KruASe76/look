@@ -88,7 +88,7 @@ async def delete_collections(
     collection_ids: list[UUID],
     user: InitDataUserWithCollectionIds,
     session: DatabaseTransaction,
-) -> None:
+) -> ...:
     await CollectionService.delete_bulk(
         session=session, user=user, collection_ids=collection_ids
     )
@@ -106,7 +106,7 @@ async def add_products_to_collections(
     product_ids: list[UUID],
     user: InitDataUserWithCollectionIds,
     session: DatabaseTransaction,
-) -> None:
+) -> ...:
     await CollectionService.add_products(
         session=session,
         user=user,
@@ -127,7 +127,7 @@ async def delete_products_from_collections(
     product_ids: list[UUID],
     user: InitDataUserWithCollectionIds,
     session: DatabaseTransaction,
-) -> None:
+) -> ...:
     await CollectionService.delete_products(
         session=session,
         user=user,
@@ -163,7 +163,7 @@ async def update_product_in_collections(
     collection_ids: list[UUID],
     user: InitDataUserWithCollectionIds,
     session: DatabaseTransaction,
-) -> None:
+) -> ...:
     await CollectionService.update_product_inclusion(
         session=session,
         user=user,

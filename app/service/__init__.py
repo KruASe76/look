@@ -1,7 +1,7 @@
 __all__ = [
-    "CatalogService",
     "CollectionService",
     "InteractionService",
+    "ProductService",
     "SearchService",
     "UserService",
     "warmup",
@@ -9,9 +9,9 @@ __all__ = [
 
 from contextlib import asynccontextmanager
 
-from .catalog import CatalogService
 from .collection import CollectionService
 from .interaction import InteractionService
+from .product import ProductService
 from .search import SearchService
 from .user import UserService
 

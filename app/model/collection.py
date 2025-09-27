@@ -66,9 +66,7 @@ class Collection(_CollectionBase, _CollectionIdsModel, table=True):
     owner: "User" = Relationship(back_populates="collections")
     products: list["Product"] = Relationship(
         link_model=CollectionProductLink,
-        sa_relationship_kwargs={
-            "order_by": "CollectionProductLink.created_at.desc()",
-        }
+        sa_relationship_kwargs={"order_by": "CollectionProductLink.created_at.desc()"},
     )
 
 

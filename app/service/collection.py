@@ -46,9 +46,10 @@ class CollectionService:
 
         return new_collection
 
-    @staticmethod
+    @classmethod
     @logfire.instrument(record_return=True)
     async def get_by_id(
+        cls,
         session: AsyncSession,
         user_id: int,
         collection_id: UUID,
@@ -76,7 +77,7 @@ class CollectionService:
                 for product in collection.products:
                     product.is_contained_in_user_collections = True
             else:
-                await CollectionService.fill_product_inclusion(
+                await cls.fill_product_inclusion(
                     session=session, products=collection.products, user_id=user_id
                 )
 
@@ -84,7 +85,7 @@ class CollectionService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def get_by_owner_id(
+    async def get_all_by_owner_id(
         session: AsyncSession, owner_id: int
     ) -> Sequence[Collection]:
         statement = (
@@ -98,9 +99,10 @@ class CollectionService:
 
         return (await session.exec(statement)).all()
 
-    @staticmethod
+    @classmethod
     @logfire.instrument(record_return=True)
     async def patch(
+        cls,
         session: AsyncSession,
         user: AuthenticatedUserWithCollectionIds,
         collection_id: UUID,
@@ -109,7 +111,7 @@ class CollectionService:
         if collection_id not in user.collection_ids:
             raise CollectionForbiddenException
 
-        collection = await CollectionService.get_by_id(
+        collection = await cls.get_by_id(
             session=session,
             user_id=user.id,
             collection_id=collection_id,
@@ -138,9 +140,10 @@ class CollectionService:
 
         await session.exec(statement)
 
-    @staticmethod
+    @classmethod
     @logfire.instrument(record_return=True)
     async def add_products(
+        cls,
         session: AsyncSession,
         user: AuthenticatedUserWithCollectionIds,
         collection_ids: list[UUID],
@@ -148,9 +151,7 @@ class CollectionService:
     ) -> None:
         if not collection_ids:
             collection_ids = [
-                await CollectionService._get_default_collection_id(
-                    session=session, user_id=user.id
-                )
+                await cls._get_default_collection_id(session=session, user_id=user.id)
             ]
 
         if set(collection_ids) - user.collection_ids:
@@ -173,9 +174,10 @@ class CollectionService:
         )
         await session.exec(statement)
 
-    @staticmethod
+    @classmethod
     @logfire.instrument(record_return=True)
     async def delete_products(
+        cls,
         session: AsyncSession,
         user: AuthenticatedUserWithCollectionIds,
         collection_ids: list[UUID],
@@ -183,9 +185,7 @@ class CollectionService:
     ) -> None:
         if not collection_ids:
             collection_ids = [
-                await CollectionService._get_default_collection_id(
-                    session=session, user_id=user.id
-                )
+                await cls._get_default_collection_id(session=session, user_id=user.id)
             ]
 
         if set(collection_ids) - user.collection_ids:
@@ -205,6 +205,9 @@ class CollectionService:
         user: AuthenticatedUserWithCollectionIds,
         product_id: UUID,
     ) -> Sequence[UUID]:
+        """
+        :return: list of collection IDs that include given product
+        """
         if not user.collection_ids:
             return []
 
@@ -214,18 +217,22 @@ class CollectionService:
         )
         return (await session.exec(statement)).all()
 
-    @staticmethod
+    @classmethod
     @logfire.instrument(record_return=True)
     async def update_product_inclusion(
+        cls,
         session: AsyncSession,
         user: AuthenticatedUserWithCollectionIds,
         product_id: UUID,
         new_collection_ids: list[UUID],
     ) -> None:
+        """
+        Set the exact list of collections that include the given product (for given user)
+        """
         if set(new_collection_ids) - user.collection_ids:
             raise CollectionForbiddenException
 
-        current_collection_ids = await CollectionService.check_product_inclusion(
+        current_collection_ids = await cls.check_product_inclusion(
             session=session, user=user, product_id=product_id
         )
 
@@ -235,7 +242,7 @@ class CollectionService:
         )
 
         if collections_to_add:
-            await CollectionService.add_products(
+            await cls.add_products(
                 session=session,
                 user=user,
                 collection_ids=collections_to_add,
@@ -243,22 +250,26 @@ class CollectionService:
             )
 
         if collections_to_remove:
-            await CollectionService.delete_products(
+            await cls.delete_products(
                 session=session,
                 user=user,
                 collection_ids=collections_to_remove,
                 product_ids=[product_id],
             )
 
-    @staticmethod
+    @classmethod
     @logfire.instrument(record_return=True)
     async def fill_product_inclusion(
-        session: AsyncSession, products: list[Product], user_id: int
+        cls, session: AsyncSession, products: list[Product], user_id: int
     ) -> None:
+        """
+        Fill `is_contained_in_user_collections` flag for each product in the list
+        :return: original list with filled flags
+        """
         if not products:
             return
 
-        default_collection_id = await CollectionService._get_default_collection_id(
+        default_collection_id = await cls._get_default_collection_id(
             session=session, user_id=user_id
         )
 
@@ -273,11 +284,13 @@ class CollectionService:
                 product.id in product_ids_in_collection
             )
 
-    @staticmethod
+    @classmethod
     @logfire.instrument(record_return=True)
-    async def _get_default_collection_id(session: AsyncSession, user_id: int) -> UUID:
-        if user_id in CollectionService._default_collection_cache:
-            return CollectionService._default_collection_cache[user_id]
+    async def _get_default_collection_id(
+        cls, session: AsyncSession, user_id: int
+    ) -> UUID:
+        if user_id in cls._default_collection_cache:
+            return cls._default_collection_cache[user_id]
 
         statement = (
             select(Collection.id)
@@ -290,13 +303,8 @@ class CollectionService:
         if result is None:
             raise CollectionNotFoundException
 
-        if (
-            len(CollectionService._default_collection_cache)
-            >= CollectionService._DEFAULT_CACHE_MAX_SIZE
-        ):
-            CollectionService._default_collection_cache.pop(
-                next(iter(CollectionService._default_collection_cache))
-            )
+        if len(cls._default_collection_cache) >= cls._DEFAULT_CACHE_MAX_SIZE:
+            cls._default_collection_cache.pop(next(iter(cls._default_collection_cache)))
 
-        CollectionService._default_collection_cache[user_id] = result
+        cls._default_collection_cache[user_id] = result
         return result

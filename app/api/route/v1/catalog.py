@@ -5,7 +5,7 @@ from fastapi import APIRouter, status
 from app.api.schema import SearchQuery, SearchSuggestionQuery
 from app.core.exceptions import ProductNotFoundException
 from app.model import BriefProductSchema, ProductSchema, SearchMeta
-from app.service import CatalogService, CollectionService, SearchService
+from app.service import CollectionService, ProductService, SearchService
 
 from ..auth import InitDataUser
 from ..dependencies import DatabaseSession, DatabaseTransaction, Pagination
@@ -24,7 +24,7 @@ catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
 async def get_product(
     product_id: UUID, user: InitDataUser, session: DatabaseTransaction
 ) -> ...:
-    product = await CatalogService.get_by_id(session=session, product_id=product_id)
+    product = await ProductService.get_by_id(session=session, product_id=product_id)
     await CollectionService.fill_product_inclusion(
         session=session, products=[product], user_id=user.id
     )
@@ -57,7 +57,9 @@ async def search_catalog(
         limit=pagination.limit,
         offset=pagination.offset,
     )
-    products = await CatalogService.get_by_ids(session=session, product_ids=product_ids)
+    products = await ProductService.get_many_by_ids(
+        session=session, product_ids=product_ids
+    )
     await CollectionService.fill_product_inclusion(
         session=session, products=products, user_id=user.id
     )

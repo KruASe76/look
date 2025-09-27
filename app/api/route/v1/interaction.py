@@ -26,7 +26,7 @@ async def record_product_interaction(
     interaction_type: Annotated[InteractionType, Body(embed=True)],
     user: InitDataUserWithCollectionIds,
     session: DatabaseTransaction,
-) -> None:
+) -> ...:
     await InteractionService.record_product_interaction(
         session=session,
         user_id=user.id,
