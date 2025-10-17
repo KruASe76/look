@@ -21,10 +21,10 @@ class Defaults:
 
 
 class SpecialUserIds:
-    GLOBAL_TRENDS = 1
-    GLOBAL_BRANDS = 2
-    PERSONAL_TRENDS = 3
-    PERSONAL_BRANDS = 4
+    GLOBAL_TRENDS = int(os.getenv("USER_ID_GLOBAL_TRENDS"))
+    GLOBAL_BRANDS = int(os.getenv("USER_ID_GLOBAL_BRANDS"))
+    PERSONAL_TRENDS = int(os.getenv("USER_ID_PERSONAL_TRENDS"))
+    PERSONAL_BRANDS = int(os.getenv("USER_ID_PERSONAL_BRANDS"))
 
 
 # TECHNICAL
