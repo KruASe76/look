@@ -6,16 +6,8 @@ from init_data_py import InitData
 from init_data_py.errors.errors import InitDataPyError
 
 from app.core.config import INIT_DATA_SCHEME_NAME
-from app.core.exceptions import (
-    InitDataForbiddenException,
-    InitDataUnauthorizedException,
-)
-from app.model import (
-    AuthenticatedUser,
-    AuthenticatedUserWithCollectionIds,
-    User,
-    UserCreate,
-)
+from app.core.exceptions import InitDataForbiddenError, InitDataUnauthorizedError
+from app.model import AuthenticatedUser, AuthenticatedUserWithCollectionIds, User, UserCreate
 from app.service import UserService
 
 from ..dependencies import DatabaseTransaction
@@ -23,21 +15,19 @@ from .config import AuthConfig
 
 
 async def validate_init_data(
-    auth: Annotated[
-        HTTPAuthorizationCredentials | None, Depends(AuthConfig.init_data_scheme)
-    ],
+    auth: Annotated[HTTPAuthorizationCredentials | None, Depends(AuthConfig.init_data_scheme)],
 ) -> InitData:
     if auth is None or auth.scheme != INIT_DATA_SCHEME_NAME:
-        raise InitDataUnauthorizedException
+        raise InitDataUnauthorizedError
 
     try:
         init_data = InitData.parse(auth.credentials)
         # init_data.validate(bot_token=BOT_TOKEN, raise_error=True)
     except InitDataPyError as e:
-        raise InitDataForbiddenException from e
+        raise InitDataForbiddenError from e
 
     if not init_data.user:
-        raise InitDataForbiddenException
+        raise InitDataForbiddenError
 
     return init_data
 
@@ -61,12 +51,10 @@ async def get_full_user(init_data: ValidInitData, session: DatabaseTransaction) 
 async def get_authenticated_user(
     init_data: ValidInitData, session: DatabaseTransaction
 ) -> AuthenticatedUser:
-    user = await UserService.get_authenticated(
-        session=session, telegram_id=init_data.user.id
-    )
+    user = await UserService.get_authenticated(session=session, telegram_id=init_data.user.id)
 
     if user is None:
-        raise InitDataUnauthorizedException
+        raise InitDataUnauthorizedError
 
     return user
 
@@ -79,7 +67,7 @@ async def get_authenticated_user_with_collection_ids(
     )
 
     if user is None:
-        raise InitDataUnauthorizedException
+        raise InitDataUnauthorizedError
 
     return user
 
@@ -87,6 +75,5 @@ async def get_authenticated_user_with_collection_ids(
 InitDataUserFull = Annotated[User, Depends(get_full_user)]
 InitDataUser = Annotated[AuthenticatedUser, Depends(get_authenticated_user)]
 InitDataUserWithCollectionIds = Annotated[
-    AuthenticatedUserWithCollectionIds,
-    Depends(get_authenticated_user_with_collection_ids),
+    AuthenticatedUserWithCollectionIds, Depends(get_authenticated_user_with_collection_ids)
 ]

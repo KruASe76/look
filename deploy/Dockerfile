@@ -1,15 +1,22 @@
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
 WORKDIR /app
-COPY app/ ./app/
-COPY main.py pyproject.toml uv.lock ./
 
+ENV UV_NO_DEV=true
+ENV UV_LOCKED=true
+ENV UV_COMPILE_BYTECODE=true
 ENV UV_LINK_MODE=copy
 ENV UV_CACHE_DIR=/cache/uv
+
+COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=$UV_CACHE_DIR \
-    uv sync --frozen --no-dev --compile-bytecode
+    uv sync --no-install-project
+
+COPY app/ ./app/
+RUN --mount=type=cache,target=$UV_CACHE_DIR \
+    uv sync --no-install-project
 
 ENV APP_HOST=0.0.0.0
 ENV APP_PORT=8000
-CMD ["uv", "run", "--no-dev", "main.py"]
+ENTRYPOINT ["uv", "run", "-m", "app.cli"]
 EXPOSE $APP_PORT

@@ -29,7 +29,9 @@ class CollectionProductLink(SQLModel, table=True):
 
     created_at: datetime | None = Field(
         sa_column=Column(
-            DateTime(timezone=True), server_default=func.now(), nullable=False
+            DateTime(timezone=True),
+            server_default=func.now(),
+            nullable=False,
         ),
         default=None,
     )
@@ -58,7 +60,9 @@ class Collection(_CollectionBase, _CollectionIdsModel, table=True):
 
     created_at: datetime | None = Field(
         sa_column=Column(
-            DateTime(timezone=True), server_default=func.now(), nullable=False
+            DateTime(timezone=True),
+            server_default=func.now(),
+            nullable=False,
         ),
         default=None,
     )

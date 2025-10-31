@@ -3,6 +3,7 @@ from datetime import datetime
 from uuid import UUID
 
 import logfire
+import pg_async_events
 from elasticsearch.dsl import AsyncSearch
 from elasticsearch.dsl.function import RandomScore
 from elasticsearch.dsl.query import (
@@ -17,20 +18,25 @@ from elasticsearch.dsl.query import (
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.database import start_readonly_session
 from app.model import Product, SearchMeta
+from app.util import AsyncRWLock
 
 from .config import PRODUCT_INDEX_NAME
 from .indices import Product as ProductDocument
 from .util import is_article
 
+META_REFRESH_NOTIFICATION_CHANNEL = "search_meta_refresh"
+
 
 class SearchService:
-    META_CACHE: SearchMeta | None = None
+    _meta_cache: SearchMeta
+    _meta_cache_lock = AsyncRWLock()
 
     @staticmethod
     @logfire.instrument(record_return=True)
     async def search_products(
-        user_id: int,  # noqa: ARG003
+        user_id: int,  # noqa: ARG004
         query: str | None,
         categories: list[str] | None,
         colors: list[str] | None,
@@ -55,13 +61,7 @@ class SearchService:
             search = search.query(
                 MultiMatch(
                     query=query,
-                    fields=[
-                        "name^3",
-                        "category^3",
-                        "color_name^2",
-                        "brand^2",
-                        "description^1",
-                    ],
+                    fields=["name^3", "category^3", "color_name^2", "brand^2", "description^1"],
                     fuzziness="AUTO",
                 )
             )
@@ -94,9 +94,7 @@ class SearchService:
             search = search.filter(Bool(filter=filters))
 
         if not query and not filters:
-            search = search.query(
-                FunctionScore(query=MatchAll(), functions=[RandomScore()])
-            )
+            search = search.query(FunctionScore(query=MatchAll(), functions=[RandomScore()]))
 
         search = search[offset : offset + limit]
 
@@ -113,18 +111,12 @@ class SearchService:
             search = search.query(
                 MultiMatch(
                     query=query,
-                    fields=[
-                        "name_suggest",
-                        "name_suggest._2gram",
-                        "name_suggest._3gram",
-                    ],
+                    fields=["name_suggest", "name_suggest._2gram", "name_suggest._3gram"],
                     type="bool_prefix",
                 )
             )
         else:
-            search = search.query(
-                FunctionScore(query=MatchAll(), functions=[RandomScore()])
-            )
+            search = search.query(FunctionScore(query=MatchAll(), functions=[RandomScore()]))
 
         search = search[0:limit]
 
@@ -133,48 +125,11 @@ class SearchService:
         return [hit.name_suggest for hit in response.hits]
 
     # noinspection PyTypeChecker,Pydantic
-    @classmethod
-    @logfire.instrument(record_return=True)
-    async def get_meta(cls, session: AsyncSession) -> SearchMeta:
-        if cls.META_CACHE is None:
-            all_brands: Sequence[str] = (
-                await session.exec(
-                    select(Product.brand).distinct().order_by(Product.brand)
-                )
-            ).all()
-            all_categories: Sequence[str] = (
-                await session.exec(
-                    select(Product.category).distinct().order_by(Product.category)
-                )
-            ).all()
-            color_dict: dict[str, str] = dict(
-                (
-                    await session.exec(
-                        select(Product.color_name, Product.color_code)
-                        .distinct(Product.color_name)  # postgres-specific
-                        .order_by(Product.color_name)
-                    )
-                ).all()
-            )
-
-            cls.META_CACHE = SearchMeta(
-                brands=all_brands, categories=all_categories, colors=color_dict
-            )
-
-        return cls.META_CACHE
-
-    @classmethod
-    @logfire.instrument(record_return=True)
-    async def refresh_meta_cache(cls, session: AsyncSession) -> SearchMeta:
-        cls.META_CACHE = None
-        return await cls.get_meta(session)
-
-    # noinspection PyTypeChecker,Pydantic
     @staticmethod
     @logfire.instrument(record_return=True)
     async def sync_products(session: AsyncSession, since: datetime) -> int:
         """
-        Sync product index with database
+        Sync product index with database.
 
         :return: number of products synced
         """
@@ -185,3 +140,58 @@ class SearchService:
             await ProductDocument.from_product(product).save()
 
         return len(products)
+
+    @classmethod
+    @logfire.instrument(record_return=True)
+    async def get_meta(cls) -> SearchMeta:
+        async with cls._meta_cache_lock.read():
+            return cls._meta_cache
+
+    @classmethod
+    @logfire.instrument
+    async def refresh_meta(cls) -> None:
+        await pg_async_events.notify(META_REFRESH_NOTIFICATION_CHANNEL, None)
+
+    @classmethod
+    async def meta_refresh_listener(cls) -> None:
+        async for _notification in pg_async_events.subscribe(META_REFRESH_NOTIFICATION_CHANNEL):
+            await cls.handle_meta_refresh_notification()
+
+    @classmethod
+    @logfire.instrument
+    async def handle_meta_refresh_notification(cls) -> None:
+        async with start_readonly_session() as session:
+            new_meta = await cls._compute_meta(session=session)
+
+        async with cls._meta_cache_lock.write():
+            cls._meta_cache = new_meta
+
+    # noinspection PyTypeChecker,Pydantic
+    @classmethod
+    @logfire.instrument(record_return=True)
+    async def _compute_meta(cls, session: AsyncSession) -> SearchMeta:
+        all_brands: Sequence[str] = (
+            (
+                await session.exec(
+                    select(Product.brand).distinct().order_by(Product.brand)
+                )
+            ).all()
+        )  # fmt: skip
+        all_categories: Sequence[str] = (
+            (
+                await session.exec(
+                    select(Product.category).distinct().order_by(Product.category)
+                )
+            ).all()
+        )  # fmt: skip
+        color_dict: dict[str, str] = dict(
+            (
+                await session.exec(
+                    select(Product.color_name, Product.color_code)
+                    .distinct(Product.color_name)  # postgres-specific
+                    .order_by(Product.color_name)
+                )
+            ).all()
+        )
+
+        return SearchMeta(brands=all_brands, categories=all_categories, colors=color_dict)

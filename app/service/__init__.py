@@ -4,10 +4,11 @@ __all__ = [
     "ProductService",
     "SearchService",
     "UserService",
+    "listen",
     "warmup",
 ]
 
-from contextlib import asynccontextmanager
+import asyncio
 
 from .collection import CollectionService
 from .interaction import InteractionService
@@ -17,7 +18,10 @@ from .user import UserService
 
 
 async def warmup() -> None:
-    from app.database import spawn_session
+    await SearchService.handle_meta_refresh_notification()
 
-    async with asynccontextmanager(spawn_session)() as session:
-        await SearchService.refresh_meta_cache(session=session)
+
+async def listen() -> None:
+    await asyncio.gather(
+        SearchService.meta_refresh_listener(),
+    )

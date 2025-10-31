@@ -1,4 +1,4 @@
-__all__ = ["DatabaseSession", "DatabaseTransaction", "Pagination"]
+__all__ = ["DatabaseReadonlySession", "DatabaseTransaction", "Pagination"]
 
-from .database import DatabaseSession, DatabaseTransaction
+from .database import DatabaseReadonlySession, DatabaseTransaction
 from .pagination import Pagination

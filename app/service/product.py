@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.core.exceptions import ProductNotFoundException
+from app.core.exceptions import ProductNotFoundError
 from app.model import Product
 
 
@@ -20,19 +20,17 @@ class ProductService:
             select(Product)
             .where(Product.id == product_id)
             .options(joinedload(Product.color_group))
-        )
+        )  # fmt: skip
 
         try:
             return (await session.exec(statement)).unique().one()
         except InvalidRequestError as e:
-            raise ProductNotFoundException from e
+            raise ProductNotFoundError from e
 
     # noinspection PyUnresolvedReferences
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def get_many_by_ids(
-        session: AsyncSession, product_ids: Sequence[UUID]
-    ) -> list[Product]:
+    async def get_many_by_ids(session: AsyncSession, product_ids: Sequence[UUID]) -> list[Product]:
         if not product_ids:
             return []
 

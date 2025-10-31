@@ -23,6 +23,4 @@ class Interaction(SQLModel, table=True):
         sa_type=PG_UUID(as_uuid=True),
     )
 
-    interaction_type: InteractionType = Field(
-        sa_type=SAEnum(InteractionType), nullable=False
-    )
+    interaction_type: InteractionType = Field(sa_type=SAEnum(InteractionType), nullable=False)

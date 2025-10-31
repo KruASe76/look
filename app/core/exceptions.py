@@ -5,60 +5,60 @@ from fastapi import status
 from app.core.config import INIT_DATA_SCHEME_NAME
 
 
-class AppException(Exception):
+class AppError(Exception):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     message = "Unknown error"
     headers: ClassVar[dict[str, str] | None] = None
 
 
-class UnauthorizedException(AppException):
+class UnauthorizedError(AppError):
     status_code = status.HTTP_401_UNAUTHORIZED
     message = "Unauthorized"
 
 
-class InitDataUnauthorizedException(UnauthorizedException):
+class InitDataUnauthorizedError(UnauthorizedError):
     message = f"{INIT_DATA_SCHEME_NAME} init-data missing"
     headers: ClassVar = {
         "WWW-Authenticate": f'{INIT_DATA_SCHEME_NAME} realm="authentication", error="missing"'
     }
 
 
-class ApiKeyUnauthorizedException(UnauthorizedException):
+class ApiKeyUnauthorizedError(UnauthorizedError):
     message = "API key missing"
     headers: ClassVar = {
         "WWW-Authenticate": 'ApiKey realm="internal authentication", error="missing"'
     }
 
 
-class ForbiddenException(AppException):
+class ForbiddenError(AppError):
     status_code = status.HTTP_403_FORBIDDEN
     message = "Forbidden"
 
 
-class InitDataForbiddenException(ForbiddenException):
+class InitDataForbiddenError(ForbiddenError):
     message = f"{INIT_DATA_SCHEME_NAME} init-data invalid or expired"
 
 
-class ApiKeyForbiddenException(ForbiddenException):
+class ApiKeyForbiddenError(ForbiddenError):
     message = "API key invalid"
 
 
-class CollectionForbiddenException(ForbiddenException):
+class CollectionForbiddenError(ForbiddenError):
     message = "User has no permission to edit one of the collections"
 
 
-class NotFoundException(AppException):
+class NotFoundError(AppError):
     status_code = status.HTTP_404_NOT_FOUND
     message = "Not found"
 
 
-class UserNotFoundException(NotFoundException):
+class UserNotFoundError(NotFoundError):
     message = "User not found"
 
 
-class ProductNotFoundException(NotFoundException):
+class ProductNotFoundError(NotFoundError):
     message = "Product not found"
 
 
-class CollectionNotFoundException(NotFoundException):
+class CollectionNotFoundError(NotFoundError):
     message = "Collection not found"

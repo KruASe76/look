@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Body, status
 
-from app.core.exceptions import ProductNotFoundException
+from app.core.exceptions import ProductNotFoundError
 from app.model import InteractionType
 from app.service import CollectionService, InteractionService
 
@@ -18,7 +18,7 @@ interaction_router = APIRouter(prefix="/interaction", tags=["interaction"])
     "/product/{product_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
-    responses=build_responses(ProductNotFoundException, include_auth=True),
+    responses=build_responses(ProductNotFoundError, include_auth=True),
     summary="Record an interaction with a product for the user",
 )
 async def record_product_interaction(
@@ -39,7 +39,7 @@ async def record_product_interaction(
         await CollectionService.add_products(
             session=session, user=user, collection_ids=[], product_ids=[product_id]
         )
-    else:
+    else:  # InteractionType.DISLIKE  # noqa: PLR5501
         # if the product is included only to the default collection, remove it from there
         if (
             len(

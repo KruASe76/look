@@ -5,7 +5,7 @@ from sqlmodel import delete, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import Defaults
-from app.core.exceptions import UserNotFoundException
+from app.core.exceptions import UserNotFoundError
 from app.model import (
     AuthenticatedUser,
     AuthenticatedUserWithCollectionIds,
@@ -24,9 +24,7 @@ from .util import check_update_needed
 class UserService:
     @classmethod
     @logfire.instrument(record_return=True)
-    async def get_or_upsert(
-        cls, session: AsyncSession, user_create: UserCreate
-    ) -> User:
+    async def get_or_upsert(cls, session: AsyncSession, user_create: UserCreate) -> User:
         if user_create.telegram_id is not None:
             statement = (
                 select(User)
@@ -82,7 +80,7 @@ class UserService:
         try:
             return (await session.exec(statement)).one()
         except InvalidRequestError as e:
-            raise UserNotFoundException from e
+            raise UserNotFoundError from e
 
     @staticmethod
     @logfire.instrument(record_return=True)
@@ -122,9 +120,7 @@ class UserService:
 
     @classmethod
     @logfire.instrument(record_return=True)
-    async def patch(
-        cls, session: AsyncSession, user: User, user_patch: UserPatch
-    ) -> User:
+    async def patch(cls, session: AsyncSession, user: User, user_patch: UserPatch) -> User:
         if check_update_needed(user_patch, user):
             cls._smart_update_user(user=user, source=user_patch)
 
@@ -143,9 +139,7 @@ class UserService:
     @staticmethod
     @logfire.instrument(record_return=True)
     def _smart_update_user(user: User, source: UserCreate | UserPatch) -> None:
-        """
-        Update user fields from source, merging preferences if present
-        """
+        """Update user fields from source, merging preferences if present."""
         update_data = source.model_dump(exclude_unset=True)
         create_preferences = update_data.pop("preferences", {})
 

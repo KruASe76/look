@@ -23,12 +23,9 @@ services:
     restart: always
 
   backend:
-    build:
-      context: ../
-      dockerfile: deploy/Dockerfile
+    image: ghcr.io/kruase76/look:latest
     env_file:
       - .env
-    scale: 2
     labels:
       - traefik.enable=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend.rule=Host(`${API_HOST}`)
@@ -48,6 +45,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_DEV_PORT}:5432
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -66,6 +65,8 @@ services:
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - ${ELASTIC_DEV_PORT}:9200
     healthcheck:
       test: [
         "CMD-SHELL",

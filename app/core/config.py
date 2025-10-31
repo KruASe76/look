@@ -33,7 +33,7 @@ DEV_API_KEY = os.getenv("DEV_API_KEY")
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-POSTGRES_URL = URL.create(
+SQLALCHEMY_URL = URL.create(
     drivername="postgresql+asyncpg",
     username=os.getenv("POSTGRES_USER"),
     password=os.getenv("POSTGRES_PASSWORD"),
@@ -41,6 +41,7 @@ POSTGRES_URL = URL.create(
     port=os.getenv("POSTGRES_PORT"),
     database=os.getenv("POSTGRES_DB"),
 )
+ASYNCPG_URL = SQLALCHEMY_URL.set(drivername="postgresql").render_as_string(hide_password=False)
 
 ELASTIC_HOST = os.getenv("ELASTIC_HOST")
 ELASTIC_USERNAME = os.getenv("ELASTIC_USERNAME")

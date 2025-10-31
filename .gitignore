@@ -1,4 +1,6 @@
 ### Custom
+.setup.stamp
+
 certs/
 keys/
 

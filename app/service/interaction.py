@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.core.exceptions import ProductNotFoundException
+from app.core.exceptions import ProductNotFoundError
 from app.model import Interaction, InteractionType
 
 
@@ -35,4 +35,4 @@ class InteractionService:
         try:
             await session.exec(statement)
         except IntegrityError as e:
-            raise ProductNotFoundException from e
+            raise ProductNotFoundError from e

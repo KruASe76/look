@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, status
 
-from app.core.exceptions import UserNotFoundException
+from app.core.exceptions import UserNotFoundError
 from app.model import UserPatch, UserSchema, UserWithPreferencesSchema
 from app.service import UserService
 
@@ -17,7 +17,7 @@ user_router = APIRouter(prefix="/user", tags=["user"])
     "/{user_id}",
     response_model=UserSchema,
     status_code=status.HTTP_200_OK,
-    responses=build_responses(UserNotFoundException),
+    responses=build_responses(UserNotFoundError),
     summary="Get user by id",
 )
 async def get_user(user_id: int, session: DatabaseTransaction) -> ...:

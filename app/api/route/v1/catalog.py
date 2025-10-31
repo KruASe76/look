@@ -3,12 +3,12 @@ from uuid import UUID
 from fastapi import APIRouter, status
 
 from app.api.schema import SearchQuery, SearchSuggestionQuery
-from app.core.exceptions import ProductNotFoundException
+from app.core.exceptions import ProductNotFoundError
 from app.model import BriefProductSchema, ProductSchema, SearchMeta
 from app.service import CollectionService, ProductService, SearchService
 
 from ..auth import InitDataUser
-from ..dependencies import DatabaseSession, DatabaseTransaction, Pagination
+from ..dependencies import DatabaseTransaction, Pagination
 from ..util import build_responses
 
 catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
@@ -18,11 +18,13 @@ catalog_router = APIRouter(prefix="/catalog", tags=["catalog"])
     "/product/{product_id}",
     response_model=ProductSchema,
     status_code=status.HTTP_200_OK,
-    responses=build_responses(ProductNotFoundException),
+    responses=build_responses(ProductNotFoundError),
     summary="Get product by id",
 )
 async def get_product(
-    product_id: UUID, user: InitDataUser, session: DatabaseTransaction
+    product_id: UUID,
+    user: InitDataUser,
+    session: DatabaseTransaction,
 ) -> ...:
     product = await ProductService.get_by_id(session=session, product_id=product_id)
     await CollectionService.fill_product_inclusion(
@@ -57,11 +59,11 @@ async def search_catalog(
         limit=pagination.limit,
         offset=pagination.offset,
     )
-    products = await ProductService.get_many_by_ids(
-        session=session, product_ids=product_ids
-    )
+    products = await ProductService.get_many_by_ids(session=session, product_ids=product_ids)
     await CollectionService.fill_product_inclusion(
-        session=session, products=products, user_id=user.id
+        session=session,
+        products=products,
+        user_id=user.id,
     )
 
     return products
@@ -83,5 +85,5 @@ async def search_suggestions(query: SearchSuggestionQuery) -> ...:
     status_code=status.HTTP_200_OK,
     summary="Get search metadata",
 )
-async def get_search_meta(session: DatabaseSession) -> ...:
-    return await SearchService.get_meta(session=session)
+async def get_search_meta() -> ...:
+    return await SearchService.get_meta()

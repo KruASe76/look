@@ -7,7 +7,7 @@ from app.model import BriefCollectionSchema
 from app.service import CollectionService
 
 from ..auth import InitDataUser
-from ..dependencies import DatabaseSession
+from ..dependencies import DatabaseReadonlySession
 
 feature_router = APIRouter(prefix="/feature", tags=["feature"])
 
@@ -18,7 +18,7 @@ feature_router = APIRouter(prefix="/feature", tags=["feature"])
     status_code=status.HTTP_200_OK,
     summary="Get trends collections",
 )
-async def get_global_trends(session: DatabaseSession) -> ...:
+async def get_global_trends(session: DatabaseReadonlySession) -> ...:
     return await CollectionService.get_all_by_owner_id(
         session=session, owner_id=SpecialUserIds.GLOBAL_TRENDS
     )
@@ -30,7 +30,7 @@ async def get_global_trends(session: DatabaseSession) -> ...:
     status_code=status.HTTP_200_OK,
     summary="Get brands collections",
 )
-async def get_global_brands(session: DatabaseSession) -> ...:
+async def get_global_brands(session: DatabaseReadonlySession) -> ...:
     return await CollectionService.get_all_by_owner_id(
         session=session, owner_id=SpecialUserIds.GLOBAL_BRANDS
     )
@@ -42,7 +42,7 @@ async def get_global_brands(session: DatabaseSession) -> ...:
     status_code=status.HTTP_200_OK,
     summary="Get trends collections",
 )
-async def get_personal_trends(user: InitDataUser, session: DatabaseSession) -> ...:  # noqa: ARG001
+async def get_personal_trends(user: InitDataUser, session: DatabaseReadonlySession) -> ...:  # noqa: ARG001
     result = list(
         await CollectionService.get_all_by_owner_id(
             session=session, owner_id=SpecialUserIds.PERSONAL_TRENDS
@@ -60,7 +60,7 @@ async def get_personal_trends(user: InitDataUser, session: DatabaseSession) -> .
     status_code=status.HTTP_200_OK,
     summary="Get brands collections",
 )
-async def get_personal_brands(user: InitDataUser, session: DatabaseSession) -> ...:  # noqa: ARG001
+async def get_personal_brands(user: InitDataUser, session: DatabaseReadonlySession) -> ...:  # noqa: ARG001
     result = list(
         await CollectionService.get_all_by_owner_id(
             session=session, owner_id=SpecialUserIds.PERSONAL_BRANDS

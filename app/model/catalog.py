@@ -20,12 +20,12 @@ class ProductColorGroup(SQLModel, table=True):
         sa_type=PG_UUID(as_uuid=True),
     )
     color_group_id: UUID = Field(
-        nullable=False, index=True, sa_type=PG_UUID(as_uuid=True)
+        nullable=False,
+        index=True,
+        sa_type=PG_UUID(as_uuid=True),
     )
 
-    color_code: str = Field(
-        min_length=7, max_length=7, sa_type=String(7), nullable=False
-    )
+    color_code: str = Field(min_length=7, max_length=7, sa_type=String(7), nullable=False)
     color_name: str = Field(max_length=50, sa_type=String(50), nullable=False)
 
 
@@ -50,9 +50,7 @@ class _BriefProductBase(SQLModel):
     brand: str = Field(max_length=255, sa_type=String(255), nullable=False)
     category: str = Field(max_length=50, sa_type=String(50), nullable=False)
 
-    color_code: str = Field(
-        min_length=7, max_length=7, sa_type=String(7), nullable=False
-    )
+    color_code: str = Field(min_length=7, max_length=7, sa_type=String(7), nullable=False)
     color_name: str = Field(max_length=50, sa_type=String(50), nullable=False)
     color_group_id: UUID = Field(nullable=False, sa_type=PG_UUID(as_uuid=True))
 

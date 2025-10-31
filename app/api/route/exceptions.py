@@ -2,12 +2,14 @@ import logfire
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import ORJSONResponse
 
-from app.core.exceptions import AppException
+from app.core.exceptions import AppError
 
 
-async def _app_exception_handler(request: Request, exc: AppException) -> Response:
+async def _app_exception_handler(request: Request, exc: AppError) -> Response:
     logfire.exception(
-        "Exception raised while handling request", request=request, _exc_info=exc
+        "Exception raised while handling request",
+        request=request,
+        _exc_info=exc,
     )
 
     return ORJSONResponse(
@@ -19,4 +21,4 @@ async def _app_exception_handler(request: Request, exc: AppException) -> Respons
 
 def register_exception_handlers(app: FastAPI) -> None:
     # noinspection PyTypeChecker
-    app.add_exception_handler(AppException, _app_exception_handler)
+    app.add_exception_handler(AppError, _app_exception_handler)

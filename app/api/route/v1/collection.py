@@ -3,10 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Body, status
 
-from app.core.exceptions import (
-    CollectionForbiddenException,
-    CollectionNotFoundException,
-)
+from app.core.exceptions import CollectionForbiddenError, CollectionNotFoundError
 from app.model import (
     BriefCollectionSchema,
     CollectionCreate,
@@ -35,7 +32,9 @@ async def create_collection(
     session: DatabaseTransaction,
 ) -> ...:
     return await CollectionService.create(
-        session=session, owner_id=user.id, collection_create=collection_create
+        session=session,
+        owner_id=user.id,
+        collection_create=collection_create,
     )
 
 
@@ -43,14 +42,16 @@ async def create_collection(
     "/collection/{collection_id}",
     response_model=CollectionSchemaWithOwner,
     status_code=status.HTTP_200_OK,
-    responses=build_responses(CollectionNotFoundException, include_auth=True),
+    responses=build_responses(CollectionNotFoundError, include_auth=True),
     summary="Get collection by id",
 )
 async def get_collection(
     collection_id: UUID, user: InitDataUser, session: DatabaseTransaction
 ) -> ...:
     return await CollectionService.get_by_id(
-        session=session, user_id=user.id, collection_id=collection_id
+        session=session,
+        user_id=user.id,
+        collection_id=collection_id,
     )
 
 
@@ -58,9 +59,7 @@ async def get_collection(
     "/collection/{collection_id}",
     response_model=BriefCollectionSchema,
     status_code=status.HTTP_200_OK,
-    responses=build_responses(
-        CollectionForbiddenException, CollectionNotFoundException, include_auth=True
-    ),
+    responses=build_responses(CollectionForbiddenError, CollectionNotFoundError, include_auth=True),
     summary="Partially update collection by id",
 )
 async def patch_collection(
@@ -81,7 +80,7 @@ async def patch_collection(
     "/collections",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
-    responses=build_responses(CollectionForbiddenException, include_auth=True),
+    responses=build_responses(CollectionForbiddenError, include_auth=True),
     summary="Delete multiple collections",
 )
 async def delete_collections(
@@ -90,7 +89,9 @@ async def delete_collections(
     session: DatabaseTransaction,
 ) -> ...:
     await CollectionService.delete_bulk(
-        session=session, user=user, collection_ids=collection_ids
+        session=session,
+        user=user,
+        collection_ids=collection_ids,
     )
 
 
@@ -98,7 +99,7 @@ async def delete_collections(
     "/collection/products",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
-    responses=build_responses(CollectionForbiddenException, include_auth=True),
+    responses=build_responses(CollectionForbiddenError, include_auth=True),
     summary="Add products to multiple collections",
 )
 async def add_products_to_collections(
@@ -119,7 +120,7 @@ async def add_products_to_collections(
     "/collection/products",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
-    responses=build_responses(CollectionForbiddenException, include_auth=True),
+    responses=build_responses(CollectionForbiddenError, include_auth=True),
     summary="Delete products from multiple collections",
 )
 async def delete_products_from_collections(
