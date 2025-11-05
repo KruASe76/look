@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 # noinspection PyTypeChecker
 class _BriefUserBase(SQLModel):
-    telegram_id: int | None = Field(unique=True, sa_type=BigInteger)
+    telegram_id: int | None = Field(unique=True, index=True, sa_type=BigInteger)
     username: str | None = Field(max_length=64, sa_type=String(64))
     first_name: str = Field(max_length=64, sa_type=String(64), nullable=False)
     last_name: str | None = Field(max_length=64, sa_type=String(64))
@@ -31,7 +31,7 @@ class _UserBase(_BriefUserBase):
 
 
 class _UserIdModel(SQLModel):
-    id: int | None = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True, sa_type=BigInteger)
 
 
 # noinspection PyUnresolvedReferences,Pydantic

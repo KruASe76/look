@@ -52,7 +52,7 @@ pull:
 
 dev-check:
 ifeq "$(wildcard $(SOURCE_CODE_DIR))" ""
-	$(error Source code directory '$(SOURCE_CODE_DIR)' does not exist. Please clone the full repository.)
+	$(error Source code directory '$(SOURCE_CODE_DIR)' does not exist. Please clone the full repository)
 endif
 
 
@@ -77,7 +77,7 @@ $(CERT_DIR):
 
 prod-certs: $(CERT_DIR)
 ifeq "$(CERT_AND_KEY_EXISTENCE_CHECK)" ""
-	$(error '$(CERT_PATH)' and '$(CERT_KEY_PATH)' should be present.)
+	$(error '$(CERT_PATH)' and '$(CERT_KEY_PATH)' should be present)
 else
 	@echo "Certificates are present"
 endif
