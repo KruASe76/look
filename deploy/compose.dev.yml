@@ -7,7 +7,24 @@ services:
       - ../uv.lock:/app/uv.lock:ro
       - ${UV_CACHE_DIR}:${UV_CACHE_DIR}
     working_dir: /app
-    command: uv run -m app.cli --reload
+    command: uv run --no-dev --group app -m app.cli --reload
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+    expose:
+      - 8000
+    scale: 1
+    restart: always
+
+  bot:
+    image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+    volumes:
+      - ../bot:/bot/bot:ro
+      - ../pyproject.toml:/bot/pyproject.toml:ro
+      - ../uv.lock:/bot/uv.lock:ro
+      - ${UV_CACHE_DIR}:${UV_CACHE_DIR}
+    working_dir: /bot
+    command: uv run --no-dev --group bot -m bot.cli --polling
     environment:
       APP_HOST: 0.0.0.0
       APP_PORT: 8000

@@ -48,7 +48,7 @@ clean:
 	cd $(DEPLOY_DIR) && docker compose -f compose.yml -f compose.dev.yml down --rmi local -v
 
 pull:
-	cd $(DEPLOY_DIR) && docker compose pull backend
+	cd $(DEPLOY_DIR) && docker compose pull backend bot
 
 dev-check:
 ifeq "$(wildcard $(SOURCE_CODE_DIR))" ""

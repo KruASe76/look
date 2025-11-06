@@ -36,6 +36,15 @@ services:
         condition: service_healthy
     restart: always
 
+  bot:
+    image: ghcr.io/kruase76/look-bot:latest
+    env_file:
+      - .env
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-bot.rule=Host(`${BOT_WEBHOOK_HOST}`)
+    restart: always
+
   postgres:
     image: postgres:16-alpine
     container_name: ${POSTGRES_HOST}

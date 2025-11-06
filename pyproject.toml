@@ -4,17 +4,28 @@ version = "0.1.0"
 description = "Backend for a clothing marketplace"
 requires-python = ">=3.13"
 dependencies = [
-    "aiohttp[speedups]>=3.13.2",
+    "aiohttp[speedups]<3.13",
+    "fastapi[standard-no-fastapi-cloud-cli]>=0.121.0",
+    "logfire[fastapi,sqlalchemy,system-metrics]>=4.14.2",
+    "pydantic<2.12",
+    "typer>=0.20.0",
+]
+
+[dependency-groups]
+dev = [
+    {include-group = "app"},
+    {include-group = "bot"},
+]
+app = [
     "asyncpg>=0.30.0",
     "elasticsearch[async]>=9.2.0",
-    "fastapi[standard-no-fastapi-cloud-cli]>=0.120.3",
     "init-data-py>=0.2.6",
-    "logfire[fastapi,sqlalchemy,system-metrics]>=4.14.2",
     "orjson>=3.11.4",
     "pg-async-events>=0.1.2",
-    "pydantic>=2.12.3",
     "sqlmodel>=0.0.27",
-    "typer>=0.20.0",
+]
+bot = [
+    "aiogram[fast]>=3.22.0",
 ]
 
 
