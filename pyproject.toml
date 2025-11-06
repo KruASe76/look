@@ -6,7 +6,7 @@ requires-python = ">=3.13"
 dependencies = [
     "aiohttp[speedups]<3.13",
     "fastapi[standard-no-fastapi-cloud-cli]>=0.121.0",
-    "logfire[fastapi,sqlalchemy,system-metrics]>=4.14.2",
+    "logfire[fastapi,sqlalchemy]>=4.14.2",
     "pydantic<2.12",
     "typer>=0.20.0",
 ]

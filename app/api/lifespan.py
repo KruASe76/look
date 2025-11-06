@@ -10,10 +10,8 @@ from app.database import dispose_database, initialize_database, setup_notificati
 from app.service import listen, warmup
 from app.service.search.client import dispose_elastic, initialize_elastic
 
-from .route import setup_routing
 
-
-def setup_logfire(fastapi_app: FastAPI) -> None:
+def setup_logfire() -> None:
     logfire.configure(
         service_name=LOGFIRE_SERVICE_NAME,
         environment=LOGFIRE_ENVIRONMENT,
@@ -23,12 +21,11 @@ def setup_logfire(fastapi_app: FastAPI) -> None:
     )
 
     logfire.instrument_pydantic()
-    logfire.instrument_fastapi(fastapi_app)
 
 
 @asynccontextmanager
-async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None]:
-    setup_logfire(fastapi_app)
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
+    setup_logfire()
 
     with logfire.span("App startup"):
         await initialize_database()
