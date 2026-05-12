@@ -13,7 +13,6 @@ services:
       APP_PORT: 8000
     expose:
       - 8000
-    scale: 1
     restart: always
 
   bot:
@@ -30,5 +29,4 @@ services:
       APP_PORT: 8000
     expose:
       - 8000
-    scale: 1
     restart: always

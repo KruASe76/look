@@ -1,7 +1,9 @@
 import os
 
-FRONTEND_URL = os.getenv("FRONTEND_URL")
 TOKEN = os.getenv("BOT_TOKEN")
+PROXY = os.getenv("BOT_PROXY")
+
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 WEBHOOK_BASE_URL = os.getenv("BOT_WEBHOOK_BASE_URL")
 
 LOGFIRE_ENVIRONMENT = os.getenv("LOGFIRE_ENVIRONMENT")

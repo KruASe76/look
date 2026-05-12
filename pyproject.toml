@@ -13,8 +13,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    {include-group = "app"},
-    {include-group = "bot"},
+    { include-group = "app" },
+    { include-group = "bot" },
 ]
 app = [
     "asyncpg>=0.30.0",
@@ -26,6 +26,7 @@ app = [
 ]
 bot = [
     "aiogram[fast]>=3.22.0",
+    "aiohttp-socks>=0.11.0",
 ]
 
 

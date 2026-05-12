@@ -5,12 +5,17 @@ from contextlib import asynccontextmanager
 import logfire
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 
-from .config import LOGFIRE_ENVIRONMENT, LOGFIRE_SERVICE_NAME, TOKEN
+from .config import LOGFIRE_ENVIRONMENT, LOGFIRE_SERVICE_NAME, PROXY, TOKEN
 from .handlers import register_handlers
 
-bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(
+    TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    session=AiohttpSession(proxy=PROXY),
+)
 dispatcher = Dispatcher()
 
 

@@ -1,34 +1,30 @@
 name: look
 
 services:
-  traefik:
-    image: traefik:v3.4
-    command:
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --entryPoints.websecure.address=:443
-      - --entryPoints.websecure.http.tls=true
-      - --providers.file.filename=/traefik/dynamic.yml
-      - --providers.file.watch=true
-      - --log.level=DEBUG
-      - --tracing.serviceName=gateway
-      - --tracing.otlp.http.endpoint=https://logfire-api.pydantic.dev/v1/traces
-      - --tracing.otlp.http.headers.Authorization=${LOGFIRE_TOKEN}
-    ports:
-      - 443:443
+  ts-sidecar:
+    image: tailscale/tailscale:latest
+    hostname: look-api
+    environment:
+      TS_AUTHKEY: ${X_TS_CLIENT_KEY}
+      TS_EXTRA_ARGS: --advertise-tags=${X_TS_DEVICE_TAG}
+      TS_SERVE_CONFIG: /config/serve.json
+      TS_USERSPACE: false
+      TS_STATE_DIR: /var/lib/tailscale
+    configs:
+      - source: ts-serve
+        target: /config/serve.json
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./certs:/certs:ro
-      - ./traefik.yml:/traefik/dynamic.yml:ro
+      - ts-state:/var/lib/tailscale
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
     restart: always
 
   backend:
     image: ghcr.io/kruase76/look:latest
     env_file:
       - .env
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend.rule=Host(`${API_HOST}`)
     depends_on:
       postgres:
         condition: service_healthy
@@ -36,13 +32,22 @@ services:
         condition: service_healthy
     restart: always
 
+  sing-box:
+    image: ghcr.io/sagernet/sing-box:latest
+    volumes:
+      - ./config.json:/etc/sing-box/config.json
+    command: run -c /etc/sing-box/config.json
+    restart: always
+
   bot:
     image: ghcr.io/kruase76/look-bot:latest
+    command: --polling
     env_file:
       - .env
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-bot.rule=Host(`${BOT_WEBHOOK_HOST}`)
+    environment:
+      BOT_PROXY: socks5://sing-box:1080
+    depends_on:
+      - sing-box
     restart: always
 
   postgres:
@@ -70,6 +75,8 @@ services:
       discovery.type: single-node
       xpack.security.enabled: "true"
       xpack.security.transport.ssl.enabled: "false"
+      xpack.ml.enabled: "false"  # some optimizations
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"  # or else it would eat 19gb ram :)
       ELASTIC_USERNAME: ${ELASTIC_USERNAME}
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
     volumes:
@@ -87,5 +94,29 @@ services:
       start_period: 5s
 
 volumes:
+  ts-state:
   postgres:
   elasticsearch:
+
+configs:
+  ts-serve:
+    content: |
+      {
+        "TCP": {
+          "443": {
+            "HTTPS": true
+          }
+        },
+        "Web": {
+          "$${TS_CERT_DOMAIN}:443": {
+            "Handlers": {
+              "/": {
+                "Proxy": "http://backend:8000"
+              }
+            }
+          }
+        },
+        "AllowFunnel": {
+          "$${TS_CERT_DOMAIN}:443": true
+        }
+      }
