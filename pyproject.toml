@@ -5,7 +5,7 @@ description = "Backend for a clothing marketplace"
 requires-python = ">=3.13"
 dependencies = [
     "aiohttp[speedups]>=3.14.1",
-    "fastapi[standard-no-fastapi-cloud-cli]>=0.137.1",
+    "fastapi[standard-no-fastapi-cloud-cli]<0.137.0",
     "logfire[fastapi,sqlalchemy]>=4.37.0",
     "pydantic>=2.13.4",
     "typer>=0.26.7",
