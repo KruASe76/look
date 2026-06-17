@@ -5,7 +5,7 @@ from elasticsearch.dsl import async_connections
 
 from app.core.config import ELASTIC_HOST, ELASTIC_PASSWORD, ELASTIC_USERNAME
 
-from .indices import Product
+from .indexes import Product
 
 async_connections.create_connection(
     hosts=ELASTIC_HOST, basic_auth=(ELASTIC_USERNAME, ELASTIC_PASSWORD)

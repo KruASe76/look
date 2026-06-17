@@ -23,8 +23,8 @@ from app.model import Product, SearchMeta
 from app.util import AsyncRWLock
 
 from .config import PRODUCT_INDEX_NAME
-from .indices import Product as ProductDocument
-from .util import is_article
+from .indexes import Product as ProductDocument
+from .util import get_current_hour_seed, is_article
 
 META_REFRESH_NOTIFICATION_CHANNEL = "search_meta_refresh"
 
@@ -94,7 +94,12 @@ class SearchService:
             search = search.filter(Bool(filter=filters))
 
         if not query and not filters:
-            search = search.query(FunctionScore(query=MatchAll(), functions=[RandomScore()]))
+            search = search.query(
+                FunctionScore(
+                    query=MatchAll(),
+                    functions=[RandomScore(seed=get_current_hour_seed(), field="_seq_no")],
+                )
+            )
 
         search = search[offset : offset + limit]
 
@@ -116,7 +121,12 @@ class SearchService:
                 )
             )
         else:
-            search = search.query(FunctionScore(query=MatchAll(), functions=[RandomScore()]))
+            search = search.query(
+                FunctionScore(
+                    query=MatchAll(),
+                    functions=[RandomScore(seed=get_current_hour_seed(), field="_seq_no")],
+                )
+            )
 
         search = search[0:limit]
 
