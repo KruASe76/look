@@ -64,4 +64,4 @@ make clean    # stop the application and delete all persistent data
 - RESTful API framework: [**FastAPI**](https://fastapi.tiangolo.com/)
 - Database: [**PostgreSQL**](https://www.postgresql.org/) via [**SQLModel**](https://sqlmodel.tiangolo.com/)
 - Search engine: [**Elasticsearch**](https://www.elastic.co/elasticsearch)
-- Deployment: [**Docker compose**](https://www.docker.com/) with [**Traefik**](https://doc.traefik.io/traefik/)
+- Deployment: [**Docker compose**](https://www.docker.com/) with [~~Traefik~~](https://doc.traefik.io/traefik/) [**Tailscale**](https://tailscale.com/)
