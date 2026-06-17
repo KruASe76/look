@@ -104,7 +104,7 @@ class SearchService:
 
     @staticmethod
     @logfire.instrument(record_return=True)
-    async def get_suggestions(query: str, limit: int) -> list[str]:
+    async def get_suggestions(query: str | None, limit: int) -> list[str]:
         search = AsyncSearch(index=PRODUCT_INDEX_NAME).source(fields=["name_suggest"])
 
         if query:
