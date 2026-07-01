@@ -17,6 +17,7 @@ dev = [
     { include-group = "bot" },
 ]
 app = [
+    "anyio>=4.14.0",
     "asyncpg>=0.31.0",
     "elasticsearch[async]>=9.4.1",
     "init-data-py>=0.2.7",

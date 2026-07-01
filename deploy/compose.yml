@@ -25,6 +25,8 @@ services:
     image: ghcr.io/kruase76/look:latest
     env_file:
       - .env
+    volumes:
+      - $IMAGE_DIR_HOST:$IMAGE_DIR:ro
     depends_on:
       postgres:
         condition: service_healthy

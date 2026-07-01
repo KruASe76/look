@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from sqlalchemy import URL
 
@@ -51,3 +52,11 @@ LOGFIRE_SERVICE_NAME = os.getenv("LOGFIRE_SERVICE_NAME")
 LOGFIRE_ENVIRONMENT = os.getenv("LOGFIRE_ENVIRONMENT")
 
 ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS", default="*").split(",")
+
+IMAGE_DIR = Path(os.getenv("IMAGE_DIR"))
+IMAGE_EXTENSION = os.getenv("IMAGE_EXTENSION")
+IMAGE_CONTENT_TYPE = os.getenv("IMAGE_CONTENT_TYPE")
+IMAGE_HEADERS = {
+    "Cache-Control": "public, max-age=604800, immutable",
+    "X-Content-Type-Options": "nosniff",
+}

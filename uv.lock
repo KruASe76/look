@@ -843,6 +843,7 @@ dependencies = [
 
 [package.dev-dependencies]
 app = [
+    { name = "anyio" },
     { name = "asyncpg" },
     { name = "elasticsearch", extra = ["async"] },
     { name = "init-data-py" },
@@ -856,6 +857,7 @@ bot = [
 dev = [
     { name = "aiogram", extra = ["fast"] },
     { name = "aiohttp-socks" },
+    { name = "anyio" },
     { name = "asyncpg" },
     { name = "elasticsearch", extra = ["async"] },
     { name = "init-data-py" },
@@ -874,6 +876,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 app = [
+    { name = "anyio", specifier = ">=4.14.0" },
     { name = "asyncpg", specifier = ">=0.31.0" },
     { name = "elasticsearch", extras = ["async"], specifier = ">=9.4.1" },
     { name = "init-data-py", specifier = ">=0.2.7" },
@@ -887,6 +890,7 @@ bot = [
 dev = [
     { name = "aiogram", extras = ["fast"], specifier = ">=3.29.0" },
     { name = "aiohttp-socks", specifier = ">=0.11.0" },
+    { name = "anyio", specifier = ">=4.14.0" },
     { name = "asyncpg", specifier = ">=0.31.0" },
     { name = "elasticsearch", extras = ["async"], specifier = ">=9.4.1" },
     { name = "init-data-py", specifier = ">=0.2.7" },

@@ -3,6 +3,7 @@
 
 certs/
 keys/
+deploy/config.json
 
 dumps/
 
